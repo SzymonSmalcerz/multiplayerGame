@@ -8,10 +8,11 @@ class Map{
   	this.statics = [];
   	this.allEntities = [];
 
-    this.leftBorderOfDisplayWindow = window.innerWidth/2 - Helper.getWidthAndHeightOfDisplayWindow().width/2;
-    this.rightBorderOfDisplayWindow = window.innerWidth/2 + Helper.getWidthAndHeightOfDisplayWindow().width/2;
-    this.topBorderOfDisplayWindow = window.innerHeight/2 - Helper.getWidthAndHeightOfDisplayWindow().height/2;
-    this.bottomBorderOfDisplayWindow = window.innerHeight/2 + Helper.getWidthAndHeightOfDisplayWindow().height/2;
+
+    this.leftBorderOfDisplayWindow = 0;
+    this.rightBorderOfDisplayWindow = handler.gameCanvasesWidth;
+    this.topBorderOfDisplayWindow = 0;
+    this.bottomBorderOfDisplayWindow = handler.gameCanvasesHeight;
 
 
     Object.defineProperty(this, "tiles", {
@@ -64,7 +65,6 @@ class Map{
 
   tick(){
     this.draw(); //first draw then tick !!! otherwise not working
-    this.handler.character.tick();
     // for(var i =0;i<this.teleportsTable.length;i++){
     //
     //   if(this.handler.character.x >= this.teleportsTable[i].xl && this.handler.character.x <= this.teleportsTable[i].xr){
@@ -82,7 +82,7 @@ class Map{
   //draw ^^
   draw(){
 
-    this.handler.camera.tick();
+
 
     //32 is the width and height of tile rectangle, we can assume that it wont change, so we will not
     //stretch for this value to Tile.js file but we will statically type in 32 (faster loading)
@@ -214,11 +214,10 @@ class Map{
         //of cource this rectangle must be at the center of the screen
 
           //creating 4 border points and putting them relatively from the center of the screen
-          this.leftBorderOfDisplayWindow = window.innerWidth/2 - this.handler.widthOfDisplayWindow/2;
-          this.rightBorderOfDisplayWindow = window.innerWidth/2 + this.handler.widthOfDisplayWindow/2;
-
-          this.topBorderOfDisplayWindow = window.innerHeight/2 - this.handler.heightOfDisplayWindow/2;
-          this.bottomBorderOfDisplayWindow = window.innerHeight/2 + this.handler.heightOfDisplayWindow/2;
+          this.leftBorderOfDisplayWindow = 0;
+          this.rightBorderOfDisplayWindow = this.handler.gameCanvasesWidth;
+          this.topBorderOfDisplayWindow = 0;
+          this.bottomBorderOfDisplayWindow = this.handler.gameCanvasesHeight;
   }
 
 }

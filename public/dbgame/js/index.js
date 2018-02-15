@@ -14,27 +14,6 @@ window.onload = function(){
   });
 };
 
-// window.onload = function(){
-//
-//   socket.on('connect', function () {
-//     console.log('Connected to server');
-//     socket.emit("getPlayerID",{
-//       id : playerID
-//     });
-//     socket.on("playerID",(playerData) => {
-//       Game.createMainCharacter(playerData);
-//       Game.handler.currentMap = new Level(playerData.currentMapLevel);
-//       Game.init();
-//       socket.on("playerID", () => {
-//         console.log("DO NOTHING !!!!");
-//       })
-//     })
-//     socket.on("alreadyLoggedIn", (data) => {
-//       alert(data.msg);
-//     })
-//   });
-// };
-
 
 
 
@@ -43,16 +22,13 @@ const Game = {
   handler : {
 		canvas : undefined,
 		ctx : undefined,
-		width : undefined,
-		height : undefined,
-		referencedWidth : undefined,
 		currentMap : undefined,
 		camera : undefined,
     entities: {},
     tiles : {},
     character : undefined,
-    gameCanvasesWidth : window.innerWidth,
-    gameCanvasesHeight : window.innerHeight,
+    gameCanvasesWidth : undefined,
+    gameCanvasesHeight : undefined,
     drawer : undefined,
     shortestPath : undefined,
     socketHandler : undefined,
@@ -61,8 +37,6 @@ const Game = {
 
 		//technicals
     scale : 1,
-    widthOfDisplayWindow : 0,
-    heightOfDisplayWindow : 0,
 		fps : 12,
 		lastTime : 0,
 		globalTickCounter : 0, //used only for animations for tiles (nor for mobs)
@@ -72,19 +46,15 @@ const Game = {
 
   init : function(){
 
-    this.handler.canvasesHandler = new CanvasesHandler(this.handler);
-    this.handler.canvasesHandler.setCanvases();
+
     this.handler.socketHandler = new SocketHandler(this.handler);
     this.handler.socketHandler.setSockets();
     this.handler.camera = new Camera(this.handler);
-    this.handler.camera.setWidthAndHeightOfDisplayWindow();
-    this.handler.camera.handleMoveXandMoveY();
 
+    this.handler.camera.handleMoveXandMoveY();
     this.handleTilesLevelsAndOther();
 
-    console.log("at the end of init");
     setTimeout(Game.mainLoop,1000);
-    console.log("end of init");
 
   },
   mainLoop : function(time){
@@ -95,7 +65,9 @@ const Game = {
 		if(time - Game.handler.lastTime > 1000/Game.handler.fps){
 
       Game.handler.lastTime = time;
+      Game.handler.camera.tick();
       Game.handler.currentMap.tick();
+      Game.handler.character.tick();
       Game.handler.globalTickCounter += 1;
 
 		}
@@ -114,6 +86,9 @@ const Game = {
     this.handler.character = new MainCharacter(this.handler, playerData);
   },
   setCurrentMap : function(mapData){
+    //creating cavas is need for map to exist so we must create canvasses before creating map
+    this.handler.canvasesHandler = new CanvasesHandler(this.handler);
+    this.handler.canvasesHandler.setCanvases();
     console.log("got map data: " + mapData);
     this.handler.currentMap = new Map(this.handler, mapData);
     Game.init();
@@ -125,12 +100,10 @@ const Game = {
 window.addEventListener("resize", function(){
 
 
-  Game.handler.camera.setWidthAndHeightOfDisplayWindow();
   Game.handler.canvasesHandler.setWidthAndHeightOfCanvases();
-
   Game.handler.camera.handleMoveXandMoveY();
   // Game.handler.shortestPath.onResize(Game.handler.widthOfDisplayWindow,Game.handler.heightOfDisplayWindow);
-  Game.handler.currentLevel.onResize();
+  Game.handler.currentMap.onResize();
 
 
 });
