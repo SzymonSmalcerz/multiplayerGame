@@ -24,7 +24,9 @@ const Game = {
 		ctx : undefined,
 		currentMap : undefined,
 		camera : undefined,
-    entities: {},
+    players: {},
+    enemies : {},
+    statics : {},
     tiles : {},
     character : undefined,
     gameCanvasesWidth : undefined,
@@ -33,6 +35,7 @@ const Game = {
     shortestPath : undefined,
     socketHandler : undefined,
     canvasesHandler : undefined,
+    dataToSend : {},
 
 
 		//technicals
@@ -54,6 +57,7 @@ const Game = {
     this.handler.camera.handleMoveXandMoveY();
     this.handleTilesLevelsAndOther();
 
+    socket.emit("initialized", {id : Game.handler.character.id});
     setTimeout(Game.mainLoop,1000);
 
   },
@@ -69,6 +73,7 @@ const Game = {
       Game.handler.currentMap.tick();
       Game.handler.character.tick();
       Game.handler.globalTickCounter += 1;
+      Game.handler.socketHandler.emitData();
 
 		}
 	},

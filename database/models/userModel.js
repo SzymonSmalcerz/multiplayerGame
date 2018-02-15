@@ -75,11 +75,9 @@ userSchema.statics.getUserByNickAndPassword = async function(nickOfUser,password
 userSchema.pre('save', function(next){
   const user = this;
   if(!user.isModified('password')){
-    console.log("WWWWWWWWWWWWWWWWWWWWWWAAAAAAAAAAAATTTTT IS MODIFIED userModel.js na dole");
     return next();
   };
 
-  console.log("USER SCHEMA PRE SAVE !!!!!!!!");
   var salt = bcrypt.genSaltSync(10);
   var hashedPassword = bcrypt.hashSync(user.password);
   user.password = hashedPassword;

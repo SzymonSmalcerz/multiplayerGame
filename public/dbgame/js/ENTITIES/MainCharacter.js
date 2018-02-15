@@ -12,7 +12,7 @@ class MainCharacter extends Mob{
     this.renderX = this.x;//must be that way !!
     this.renderY = this.y;//must be that way !!
 
-    this.handler.entities[this.id] = this;
+
 
     this.setSprites();
 
@@ -69,7 +69,8 @@ class MainCharacter extends Mob{
         this.move(0,-(this.speed));
       }
     }
-    this.emitDataToOthers();
+
+    this.fillDataToSend();
   }
 
   manageFighting(){
@@ -148,9 +149,13 @@ class MainCharacter extends Mob{
   	}
   }
 
-  emitDataToOthers(){
-    //  not emit to others but add emit data to Game.handler and then it will be emitted to server :)
-    //  we want to preserve link throught.
+  fillDataToSend(){
+    this.handler.dataToSend.character = {
+      id : this.id,
+      x : this.x,
+      y : this.y,
+      currentSprite : this.currentSprite
+    }
   }
 
   setSprites(){

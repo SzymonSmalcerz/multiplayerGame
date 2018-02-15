@@ -2,10 +2,9 @@ class Map{
   //constructor(tilesTable,teleportsCoords,maxNumOfEnemies){
   constructor(handler,dataFromServer){
     this.handler = handler;
-  	this.players = [handler.character];
-  	this.enemies = [];
+
+
     this.specialTiles = [];
-  	this.statics = [];
   	this.allEntities = [];
 
 
@@ -49,19 +48,7 @@ class Map{
     console.log("map has been created")
   }
 
-  sortEntityTable(){ //sorting for drawing purposes
-  	var temp;
-  	for(var i =0;i<this.allEntities.length;i++){
-  		for(var j=0;j<this.allEntities.length;j++){
-        //flat rendering => tile on tile we do not want it to be sorted
-  			if((this.allEntities[i].flatRendering  || (this.allEntities[i] && this.allEntities[j] && this.allEntities[i].y + this.allEntities[i].height < this.allEntities[j].y + this.allEntities[j].height)) && !this.allEntities[j].flatRendering){
-  				temp = this.allEntities[i];
-  				this.allEntities[i] = this.allEntities[j];
-  				this.allEntities[j] = temp;
-  			}
-  		}
-  	}
-  };
+
 
   tick(){
     this.draw(); //first draw then tick !!! otherwise not working
@@ -149,24 +136,37 @@ class Map{
 
     var tempArrayOfEntities = [];
     var tempArrayOfEnemies = [];
+    var tempArrayOfPlayers = [];
+    var tempArrayOfStatics = [];
     var entityTemp;
 
-    for(var i=0;i< this.players.length; i++){
-      entityTemp = this.players[i];
-      if(entityTemp !== Game.handler.character){
-        entityTemp.renderX = entityTemp.x + this.moveX;
-        entityTemp.renderY = entityTemp.y + this.moveY;
-      }
+    for(var playerID in this.handler.players){
+      if (!this.handler.players.hasOwnProperty(playerID)) continue;
+      var player = this.handler.players[playerID];
+      tempArrayOfPlayers.push(player);
+    }
+
+    for(var i=0;i< tempArrayOfPlayers.length; i++){
+      entityTemp = tempArrayOfPlayers[i];
+      entityTemp.renderX = entityTemp.x + this.moveX;
+      entityTemp.renderY = entityTemp.y + this.moveY;
       if(entityTemp.renderX >= this.leftBorderOfDisplayWindow - entityTemp.width
       && entityTemp.renderX <= this.rightBorderOfDisplayWindow + entityTemp.width
       && entityTemp.renderY >= this.topBorderOfDisplayWindow - entityTemp.height
       && entityTemp.renderY <= this.bottomBorderOfDisplayWindow + entityTemp.height){
+
         tempArrayOfEntities.push(entityTemp);
       }
   	}
 
-  	for(var i=0;i< this.statics.length; i++){
-      entityTemp = this.statics[i];
+    for(var staticID in this.handler.statics){
+      if (!this.handler.statics.hasOwnProperty(staticID)) continue;
+      var staticTemp = this.handler.statics[staticID];
+      tempArrayOfStatics.push(staticTemp);
+    }
+
+  	for(var i=0;i< tempArrayOfStatics.length; i++){
+      entityTemp = tempArrayOfStatics[i];
       entityTemp.renderX = entityTemp.x + this.moveX;
       entityTemp.renderY = entityTemp.y + this.moveY;
       if(entityTemp.renderX >= this.leftBorderOfDisplayWindow - entityTemp.width
@@ -176,6 +176,7 @@ class Map{
         tempArrayOfEntities.push(entityTemp);
       }
   	}
+
 
     for(var enemyID in this.handler.enemies){
 
@@ -200,9 +201,23 @@ class Map{
     }
 
 
-    this.enemies = tempArrayOfEnemies;
+    tempArrayOfEntities.push(this.handler.character);
     this.allEntities = tempArrayOfEntities;
   	this.sortEntityTable();
+  }
+
+  sortEntityTable(){ //sorting for drawing purposes
+  	var temp;
+  	for(var i =0;i<this.allEntities.length;i++){
+  		for(var j=0;j<this.allEntities.length;j++){
+        //flat rendering => tile on tile we do not want it to be sorted
+  			if((this.allEntities[i].flatRendering  || (this.allEntities[i] && this.allEntities[j] && this.allEntities[i].y + this.allEntities[i].height < this.allEntities[j].y + this.allEntities[j].height)) && !this.allEntities[j].flatRendering){
+  				temp = this.allEntities[i];
+  				this.allEntities[i] = this.allEntities[j];
+  				this.allEntities[j] = temp;
+  			}
+  		}
+  	}
   }
 
 

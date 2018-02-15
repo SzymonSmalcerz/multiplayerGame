@@ -10,15 +10,55 @@ class Map{
     this.players = players;
     this.enemies = enemies;
     this.statics = statics;
+    this.tableOfRemovedPlayers = {};
 
     this.socketTable = socketTable;
     this.enemyData = []; //we send this to players !
     this.tilesAndTeleportCoords = tilesAndTeleportCoords;
     this.respawnFrame = 0;
+    this.dataToSend = {};
   }
 
   tick(){
 
+    var playersData = {};
+
+    var tempPlayers = this.players;
+
+    for (var playerID in tempPlayers) {
+
+        if (!tempPlayers.hasOwnProperty(playerID)) continue;
+
+        playersData[playerID] = {
+          id : playerID,
+          x : tempPlayers[playerID].x,
+          y : tempPlayers[playerID].y,
+          currentSprite : tempPlayers[playerID].currentSprite
+        }
+
+    }
+
+    for (var playerID in this.tableOfRemovedPlayers) {
+
+      if (!this.tableOfRemovedPlayers.hasOwnProperty(playerID)) continue;
+
+      playersData[playerID] = {
+        remove : true
+      }
+
+    }
+
+    this.tableOfRemovedPlayers = {};
+
+    for (var playerID in tempPlayers) {
+
+        if (!tempPlayers.hasOwnProperty(playerID)) continue;
+
+        this.socketTable[playerID].emit("mapData",{
+          playersData
+        })
+
+    }
 
   }
 
@@ -46,6 +86,16 @@ class Map{
         error : "bad coords of player"
       }
     }
+
+    addPlayer(playerData){
+      this.players[playerData.id] = playerData;
+    }
+
+    removePlayer(playerID){
+      delete this.players[playerID];
+      this.tableOfRemovedPlayers[playerID] = {playerID:playerID};
+    }
+
 }
 
 class FirstMap extends Map{
