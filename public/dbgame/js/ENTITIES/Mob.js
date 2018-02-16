@@ -10,6 +10,9 @@ class Mob extends Entity{
 
   }
 
+  tick(){
+    this.draw();
+  }
 
   draw(){
     //draw sprite
@@ -34,8 +37,6 @@ class Mob extends Entity{
       this.renderFloatingMob();
     }
 
-    //then draw hp
-    this.drawHp();
 
     //increnment tick counter
     this.tickCounter+=0.25;
@@ -74,14 +75,6 @@ class Mob extends Entity{
   }
 
 
-  drawHp(){
-    if(this != this.handler.character && !this.dead){
-      this.handler.ctx.fillStyle = "rgb(90,0,0)";
-    	this.handler.ctx.fillRect(this.renderX ,this.renderY - this.height/8, this.width,	Math.min(4,Math.max(Math.floor(this.height/15),1)));
-
-    	this.handler.ctx.fillStyle = "rgb(255,0,0)";
-    	this.handler.ctx.fillRect(this.renderX ,this.renderY - this.height/8, this.width * this.health/this.maxHealth,	Math.min(4,Math.max(Math.floor(this.height/15),1)));
-    }
-  }
+  
 
 }

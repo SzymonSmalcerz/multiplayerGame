@@ -8,6 +8,7 @@ class SocketHandler{
 
     var handler = this.handler;
     var tableOfPlayersIDToRemove = [];
+    var tableOfEnemiesIDToRemove = [];
 
     socket.on("mapData",function(data){
 
@@ -42,6 +43,42 @@ class SocketHandler{
 
       tableOfPlayersIDToRemove = [];
 
+
+      for (var enemyID in data.enemiesData) {
+
+        if (!data.enemiesData.hasOwnProperty(enemyID)) continue;
+
+
+
+        if(data.enemiesData[enemyID].remove){
+          tableOfEnemiesIDToRemove.push(enemyID);
+          continue;
+        }
+
+        if(!handler.enemies[enemyID]){
+          handler.enemies[enemyID] = new Hulk(handler,enemyID,data.enemiesData[enemyID].x,data.enemiesData[enemyID].y)
+        }
+
+        handler.enemies[enemyID].x = data.enemiesData[enemyID].x;
+        handler.enemies[enemyID].y = data.enemiesData[enemyID].y;
+        handler.enemies[enemyID].currentSprite = data.enemiesData[enemyID].currentSprite;
+
+        if(data.enemiesData[enemyID].width){
+          handler.enemies[enemyID].width = data.enemiesData[enemyID].width;
+          handler.enemies[enemyID].height = data.enemiesData[enemyID].height;
+          handler.enemies[enemyID].collisionWidth = data.enemiesData[enemyID].collisionWidth;
+          handler.enemies[enemyID].collisionHeight = data.enemiesData[enemyID].collisionHeight;
+          handler.enemies[enemyID].health = data.enemiesData[enemyID].health;
+        }
+
+
+      }
+
+      for(var i=0;i<tableOfEnemiesIDToRemove.length;i++){
+        delete handler.enemies[tableOfEnemiesIDToRemove[i]];
+      }
+
+      tableOfEnemiesIDToRemove = [];
     })
 
 
