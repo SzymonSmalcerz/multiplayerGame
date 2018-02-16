@@ -27,9 +27,7 @@ Helper.areTwoEntitiesInRange = function(entity1, entity2, speedOfEntity1){
 };
 
 Helper.getDistanceBetweenTwo2DPoints = function(point1, point2){
-
-  return Math.sqrt(Math.pow((point1.x - point.x),2) + Math.pow(point1.y - point2.y));
-
+  return Math.sqrt(Math.pow((point1.x - point2.x),2) + Math.pow((point1.y - point2.y),2));
 };
 
 
@@ -39,6 +37,15 @@ Helper.getCenterOfEntityCollision = function(entity){
     y : entity.y + entity.height*0.9 - entity.collisionHeight/2
   }
 }
+
+
+Helper.getCenterOfEntity = function(entity){
+  return {
+    x : entity.x + entity.width/2,
+    y : entity.y + entity.height/2
+  }
+}
+
 
 Helper.getRightCornerOfEntityCollision = function(entity){
   return {

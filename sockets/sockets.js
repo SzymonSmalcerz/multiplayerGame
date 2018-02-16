@@ -58,6 +58,8 @@ var socketHandler = (socket,io) => {
         characterData.attack = 50;
         characterData.id = object.id;
         characterData.active = true;
+        characterData.width = 32;
+        characterData.height = 32;
 
         findMapNameByPlayerId[object.id] = user.currentMapName;
         socketsOfPlayers[object.id] = socket;
@@ -104,7 +106,15 @@ socket.on("data",(data) => {
   }
   players[data.character.id].x = data.character.x;
   players[data.character.id].y = data.character.y;
-  players[data.character.id].currentSprite = data.character.currentSprite
+  players[data.character.id].currentSprite = data.character.currentSprite;
+
+  if(data.fight){
+    maps[findMapNameByPlayerId[data.character.id]].handleFight(data.character.id,data.fight.enemyID);
+  }
+
+  if(data.fightMove){
+    maps[findMapNameByPlayerId[data.character.id]].handleFightMove(data.fightMove,data.character.id);
+  }
 });
 
 //END OF DATA EXCHANGE SERVER -> CLIENT

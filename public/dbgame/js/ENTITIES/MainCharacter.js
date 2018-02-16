@@ -11,6 +11,7 @@ class MainCharacter extends Mob{
 
     this.renderX = this.x;//must be that way !!
     this.renderY = this.y;//must be that way !!
+    this.opponent = {};
 
 
 
@@ -37,8 +38,6 @@ class MainCharacter extends Mob{
 
   tick(){
 
-
-
     this.currentSprite = this.idle;
 
     if(keyHandler["37"] || keyHandler["38"] || keyHandler["39"] || keyHandler["40"] ){
@@ -46,36 +45,25 @@ class MainCharacter extends Mob{
       this.movesStack = [];
   	}
 
-    if(this.isRegeneratingMana ){
-  		this.manageRegenerationMana();
-      this.movesStack = [];
-  	}else if(this.usingSkill && this.mana >= 3){
-      this.movesStack = [];
-  	}else if(this.isFighting){
+    if(this.isFighting){
       this.manageFighting();
       this.movesStack = [];
-    }
-
-
-    if(this.movesStack.length>0){
-      var move = this.movesStack.pop();
-      if(move == "right"){
-        this.move(this.speed,0);
-      }else if(move == "left"){
-        this.move(-(this.speed),0);
-      }else if(move == "down"){
-        this.move(0,this.speed);
-      }else{
-        this.move(0,-(this.speed));
-      }
     }
 
     this.fillDataToSend();
   }
 
   manageFighting(){
+    if(keyHandler["49"]){
+      console.log("player wants to attack");
+      keyHandler["49"] = false;
 
+      this.handler.dataToSend.fightMove = {
+        move : "normal"
+      }
+    }
   }
+
   move(x,y){
   	this.currentSprite = this.idle;
     var canMove = true;
@@ -177,27 +165,23 @@ class MainCharacter extends Mob{
   manageKeyPressing(){
     if(keyHandler["37"]	){
       this.idle = this.idleLeft;
-      if(!this.isFighting && !this.isRegeneratingMana){
+      if(!this.isFighting){
         this.move(-1,0);
       }
     }else if(keyHandler["38"]	){
       this.idle = this.idleUp;
-      if(!this.isFighting && !this.isRegeneratingMana)
+      if(!this.isFighting)
         this.move(0,-1);
     }else if(keyHandler["39"]	){
       this.idle = this.idleRight;
-      if(!this.isFighting && !this.isRegeneratingMana)
+      if(!this.isFighting)
         this.move(1,0);
     }else if(keyHandler["40"]	){
       this.idle = this.idleDown;
-      if(!this.isFighting && !this.isRegeneratingMana)
+      if(!this.isFighting)
         this.move(0,1);
     }
   }
-  manageRegenerationMana(){
-    this.currentSprite =	[{x:3,y:10},{x:4,y:10},{x:5,y:10},{x:6,y:10},{x:7,y:10},{x:8,y:10}];
-  }
-
 
 }
 
@@ -208,84 +192,25 @@ class MainCharacter extends Mob{
 var keyHandler = {};
 
 window.addEventListener("keydown",function(event){
-
-
-	if(event.keyCode === 82){
-
-		Game.handler.character.isRegeneratingMana = true;
-		Game.handler.character.isFighting = false;
-		Game.handler.character.usingSkill = false;
+	if(event.keyCode >= 37 && event.keyCode <= 40){
 		keyHandler["37"] = keyHandler["38"] = keyHandler["39"] = keyHandler["40"] = false;
-		return;
-		//keyHandler["37"] = keyHandler["38"] = keyHandler["39"] = keyHandler["40"] = false;
-
-	};
-
-	if(event.keyCode === 32){
-
-		Game.handler.character.isFighting = true;
-		//keyHandler["37"] = keyHandler["38"] = keyHandler["39"] = keyHandler["40"] = false;
-
-	};
-
-	if(event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40){
-
-		keyHandler["37"] = keyHandler["38"] = keyHandler["39"] = keyHandler["40"] = false;
-
 			keyHandler[event.keyCode] = true;
-
-
 	};
-
-	if(event.keyCode >=  49 && event.keyCode <= 57){
-
-		for(var i = 49;i<58;i++){
-			keyHandler[i.toString()] = false;
-		};
-
-		Game.handler.character.isFighting = false;
-		Game.handler.character.usingSkill = true;
-
-		keyHandler[event.keyCode] = true;
-	}
-
-
-
-
 });
 
 
 window.addEventListener("keyup",function(event){
 
-
-	if(event.keyCode === 82){
-
-		Game.handler.character.isRegeneratingMana = false;
-		//keyHandler["37"] = keyHandler["38"] = keyHandler["39"] = keyHandler["40"] = false;
-
-	};
-
-	if(event.keyCode === 32){
-
-		Game.handler.character.isFighting = false;
-
-	};
-
-	if(event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40){
-
+	if(event.keyCode >= 37 && event.keyCode <= 40){
 		keyHandler["37"] = keyHandler["38"]= keyHandler["39"] = keyHandler["40"] = false;
-
 	};
 
 
 	if(event.keyCode >=  49 && event.keyCode <= 57){
-
 		for(var i = 49;i<58;i++){
 			keyHandler[i.toString()] = false;
 		};
-
-		Game.handler.character.usingSkill = false;
-
+    keyHandler[event.keyCode] = true;
 	}
 
 

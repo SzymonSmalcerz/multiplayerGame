@@ -12,6 +12,8 @@ class SocketHandler{
 
     socket.on("mapData",function(data){
 
+
+
       for (var playerID in data.playersData) {
 
         if (!data.playersData.hasOwnProperty(playerID)) continue;
@@ -24,6 +26,38 @@ class SocketHandler{
         }
 
         if(handler.character.id == playerID){
+
+          if(data.fight && data.fight[playerID]){
+            handler.character.isFighting = true;
+            handler.character.opponent = handler.enemies[data.fight[playerID].enemyID];
+          }
+
+          if(data.fightResult){
+            handler.character.isFighting = false;
+            handler.character.opponent = {};
+            Game.onResize();
+          }
+
+          if(data.playersData[playerID].statics){
+            handler.statics = [];
+            console.log("GOT STATICS DATA");
+            //handler.statics = data.playersData[playerID].statics;
+            var staticData = data.playersData[playerID].statics;
+            for(var i=0;i<staticData.length;i++){
+              var staticEntity;
+
+                if(staticData[i].typeOfSprite == "32"){
+                  staticEntity = new StaticEntity32(handler,staticData[i]);
+                }else{
+                  staticEntity = new StaticEntity(handler,staticData[i]);
+                }
+
+
+              // staticEntity.renderX += handler.currentMap.moveX;
+              // staticEntity.renderY += handler.currentMap.moveY;
+              handler.statics.push(staticEntity);
+            }
+          }
           continue;
         }
 
@@ -94,6 +128,7 @@ class SocketHandler{
   emitData(){
     var handler = this.handler;
     socket.emit("data",handler.dataToSend);
+    handler.dataToSend = {};
   }
 
 }

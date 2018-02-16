@@ -36,10 +36,16 @@ Helper.areTwoEntitiesInRange = function(entity1, entity2, speedOfEntity1){
 
 Helper.getDistanceBetweenTwo2DPoints = function(point1, point2){
 
-  return Math.sqrt(Math.pow((point1.renderX - point.renderX),2) + (Math.pow(point1.renderY - point2.renderY),2));
+  return Math.sqrt(Math.pow((point1.renderX - point2.renderX),2) + (Math.pow((point1.renderY - point2.renderY),2)));
 
 };
 
+Helper.getCenterOfEntity = function(entity){
+  return {
+    renderX : entity.renderX + entity.width/2,
+    renderY : entity.renderY + entity.height/2
+  }
+}
 
 Helper.getCenterOfEntityCollision = function(entity){
   return {
@@ -52,27 +58,5 @@ Helper.getRightCornerOfEntityCollision = function(entity){
   return {
     renderX : entity.renderX + entity.width/2 + entity.collisionWidth/2,
     renderY : entity.renderY + entity.height*0.9
-  }
-}
-
-Helper.getWidthAndHeightOfDisplayWindow = function(){
-  var width;
-  var height;
-
-  if(window.innerWidth< 550){
-    width = window.innerWidth;
-  }else{
-    width = 550;
-  }
-
-  if(window.innerHeight< 400){
-    height = window.innerHeight;
-  }else{
-    height = 400;
-  }
-
-  return {
-    width,
-    height
   }
 }

@@ -3,6 +3,8 @@ class Map{
   constructor(handler,dataFromServer){
     this.handler = handler;
 
+    this.fightTile = dataFromServer.fightTile;
+
 
     this.specialTiles = [];
   	this.allEntities = [];
@@ -69,6 +71,31 @@ class Map{
   //draw ^^
   draw(){
 
+    if(this.handler.character.isFighting){
+
+      for(var i = 0;i <= this.rightBorderOfDisplayWindow/32 + 1; i++){
+    		for(var j = 0;j <= this.bottomBorderOfDisplayWindow/32 + 1; j++){
+          // console.log(((this.bottomBorderOfDisplayWindow/32) + 2) + "VSS" + (this.bottomBorderOfDisplayWindow/32 + 2))
+          tempTileContainer = this.handler.tiles[this.fightTile];
+    		  tempTileContainer.draw(i*32, j*32);
+    		}
+    	}
+
+      var player = this.handler.character;
+      var enemy  = this.handler.character.opponent;
+
+      player.renderX = this.rightBorderOfDisplayWindow * 0.25 - player.width/2;
+      player.renderY = this.bottomBorderOfDisplayWindow * 0.5 - player.height/2;
+
+      enemy.renderX = this.rightBorderOfDisplayWindow * 0.75 - enemy.width/2;
+      enemy.renderY = this.bottomBorderOfDisplayWindow * 0.5 - enemy.height/2;
+
+      player.draw();
+      enemy.draw();
+
+      return;
+    }
+
 
 
     //32 is the width and height of tile rectangle, we can assume that it wont change, so we will not
@@ -94,7 +121,6 @@ class Map{
                   });
                 }
   			}
-
   		}
   	}
     this.specialTiles = specialTilesTemp;

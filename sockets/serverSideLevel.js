@@ -1,5 +1,7 @@
 const {Hit,Hulk,Dragon,Yeti,DarkKnight,MinionSkeleton} = require("./serverSideEnemy");
+const Static = require("./serverSideStatic");
 const MapTiles = require("./serverSideLevelTiles");
+const Helper = require("./Helper");
 
 
 
@@ -13,6 +15,10 @@ class Map{
     this.tableOfRemovedPlayers = {};
     this.tableOfRemovedEnemies = [];
 
+    this.setEnemies = false;
+    this.tableOfSendedEnemies = {};
+    this.fight = {};
+
     this.socketTable = socketTable;
     this.tilesAndTeleportCoords = tilesAndTeleportCoords;
     this.respawnFrame = 0;
@@ -23,6 +29,8 @@ class Map{
 
     this.checkForEnemies();
 
+
+
     var enemiesData = {};
     var tempEnemies = this.enemies;
     for (var enemyID in tempEnemies) {
@@ -30,14 +38,14 @@ class Map{
         if (!tempEnemies.hasOwnProperty(enemyID)) continue;
 
         tempEnemies[enemyID].tick();
-
+        enemiesData[enemyID] = {};
         if(tempEnemies[enemyID].dead){
           this.tableOfRemovedEnemies.push(enemyID);
           enemiesData[enemyID].remove = true;
           continue;
         }
 
-        if(tempEnemies[enemyID].set){
+        if(this.setEnemies && this.tableOfSendedEnemies[enemyID]){
           enemiesData[enemyID] = {
             id : enemyID,
             x : tempEnemies[enemyID].x,
@@ -57,11 +65,10 @@ class Map{
             collisionHeight : tempEnemies[enemyID].collisionHeight,
             health : tempEnemies[enemyID].health
           }
-          tempEnemies[enemyID].set = true;
+          this.tableOfSendedEnemies[enemyID] = true;
         }
-
-
     }
+    this.setEnemies = true;
 
     var playersData = {};
     var tempPlayers = this.players;
@@ -77,6 +84,11 @@ class Map{
           currentSprite : tempPlayers[playerID].currentSprite
         }
 
+        if(!tempPlayers[playerID].setStatics){
+          playersData[playerID].statics = this.statics
+          tempPlayers[playerID].setStatics = true;
+        }
+
     }
 
     for (var playerID in this.tableOfRemovedPlayers) {
@@ -89,20 +101,21 @@ class Map{
 
     }
 
+    this.dataToSend.playersData = playersData;
+    this.dataToSend.enemiesData = enemiesData;
 
     for (var playerID in tempPlayers) {
 
         if (!tempPlayers.hasOwnProperty(playerID)) continue;
 
-        this.socketTable[playerID].emit("mapData",{
-          playersData,
-          enemiesData
-        })
+        this.socketTable[playerID].emit("mapData",this.dataToSend)
 
     }
+    this.dataToSend = {};
 
     for(var i=0;i<this.tableOfRemovedEnemies.length;i++){
-      delete this.enemies[tableOfRemovedEnemies[i]];
+      delete this.tableOfSendedEnemies[this.tableOfRemovedEnemies[i]];
+      delete this.enemies[this.tableOfRemovedEnemies[i]];
     }
 
     this.tableOfRemovedPlayers = {};
@@ -114,6 +127,8 @@ class Map{
 
 
     getNextMapData(playerID){
+
+      //MUSIMY ZMIENIC setStatics = false dla playera, ktory zmeinai mape !: o
       var teleportsTable = this.tilesAndTeleportCoords.teleportsTable;
       if(!this.players[playerID]) return {
         error : "player not found"
@@ -138,6 +153,7 @@ class Map{
 
     addPlayer(playerData){
       this.players[playerData.id] = playerData;
+      this.setEnemies = false;
     }
 
     removePlayer(playerID){
@@ -149,20 +165,93 @@ class Map{
       //we call this function from tick, and any subclass of Map can fill body of this function for its own purpose
     }
 
+    handleFight(playerID,enemyID){
+
+      console.log("0");
+
+      if(this.enemies[enemyID].fighting || this.enemies[enemyID].dead){
+        return;
+      }
+
+      var playerCenter = Helper.getCenterOfEntity({
+        x : this.players[playerID].x,
+        y : this.players[playerID].y,
+        width : 32,
+        height : 32
+      });
+      var enemyCenter = Helper.getCenterOfEntity(this.enemies[enemyID]);
+      var distance = Helper.getDistanceBetweenTwo2DPoints(playerCenter,enemyCenter);
+      console.log("1");
+      if(distance < this.players[playerID].width + this.enemies[enemyID].width/2){
+        console.log("2");
+        this.dataToSend.fight = {};
+        this.dataToSend.fight[playerID] = {};
+        this.dataToSend.fight[playerID].enemyID = enemyID;
+        this.fight[playerID] = {};
+        this.fight[playerID].turn = "player";
+        this.fight[playerID].opponentID = enemyID;
+
+        this.enemies[enemyID].fighting = true;
+        this.enemies[enemyID].opponentID = playerID;
+      }
+
+      console.log("3");
+
+    }
+
+    handleFightMove(fightData,playerID){
+
+      if(this.fight[playerID].turn != "player"){
+        return;
+      }
+
+      var opponent = this.enemies[this.fight[playerID].opponentID];
+
+      if(fightData.move == "normal"){
+        opponent.health -= this.players[playerID].attack;
+      }
+
+
+      opponent.tick();
+      if(opponent.dead){
+        opponent.onDie();
+        delete this.fight[playerID];
+        this.dataToSend.fightResult = true;
+      }
+
+
+
+    }
+
 }
 
 class FirstMap extends Map{
   constructor(socketTable){
-    super("firstMap", MapTiles["firstMap"],{},{},{},socketTable);
+    var statics = [
+                  //  Static.getHouse1Data(500,400),
+                  //  Static.getHouse1Data(650,400),
+                  //  Static.getHouse1Data(800,400),
+                  //  Static.getHouse1Data(950,400),
+                  //  Static.getHouse2Data(300,330)
+      ];
+
+      for(var i=0;i<50;i++){
+        if(Math.random() > 0.5){
+          statics.push(Static.getTreeData(Math.floor(Math.random() * 1150 + 50),Math.floor(Math.random() * 650 + 650)));
+        }else{
+          statics.push(Static.getTree2Data(Math.floor(Math.random() * 1150 + 50),Math.floor(Math.random() * 650 + 650)));
+        }
+      }
+    super("firstMap", MapTiles["firstMap"],{},{},statics,socketTable);
     this.numberOfHulks = 0;
   }
 
   checkForEnemies(){
     this.respawnFrame += 1;
-    if(this.numberOfHulks < 5 && this.respawnFrame > 10){
+    if(this.numberOfHulks < 2 && this.respawnFrame > 1){
       this.respawnFrame = 0;
-      var x = Math.floor(Math.random() * 200 + 200);
-      var y = Math.floor(Math.random() * 200 + 200);
+      var x = Math.floor(Math.random() * 600 + 200);
+      var y = Math.floor(Math.random() * 600 + 200);
       var tempID = "hu" + Math.floor(Math.random() * 1000000) + "fm";
       var here = this;
       this.enemies[tempID] = new Hulk(tempID,x,y,function(){

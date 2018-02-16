@@ -26,7 +26,7 @@ const Game = {
 		camera : undefined,
     players: {},
     enemies : {},
-    statics : {},
+    statics : [],
     tiles : {},
     character : undefined,
     gameCanvasesWidth : undefined,
@@ -74,6 +74,7 @@ const Game = {
       Game.handler.character.tick();
       Game.handler.globalTickCounter += 1;
       Game.handler.socketHandler.emitData();
+      Game.handler.dataToSend = {};
 
 		}
 	},
@@ -97,18 +98,14 @@ const Game = {
     console.log("got map data: " + mapData);
     this.handler.currentMap = new Map(this.handler, mapData);
     Game.init();
+  },
+  onResize(){
+    Game.handler.canvasesHandler.setWidthAndHeightOfCanvases();
+    Game.handler.camera.handleMoveXandMoveY();
+    Game.handler.currentMap.onResize();
   }
 
 }
 
 
-window.addEventListener("resize", function(){
-
-
-  Game.handler.canvasesHandler.setWidthAndHeightOfCanvases();
-  Game.handler.camera.handleMoveXandMoveY();
-  // Game.handler.shortestPath.onResize(Game.handler.widthOfDisplayWindow,Game.handler.heightOfDisplayWindow);
-  Game.handler.currentMap.onResize();
-
-
-});
+window.addEventListener("resize", Game.onResize);

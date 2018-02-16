@@ -19,6 +19,7 @@ class Enemy{
   	this.collisionWidth = collisionWidth || this.width/3 ;
     this.tickCounter = 0;
     this.callbackOnDeath = callbackOnDeath;
+    this.opponentID = 0;
 
     //SPRITES
   	this.idle = moveSprite.idle;
@@ -72,13 +73,7 @@ class Enemy{
       this.dead = true;
       return;
     }
-    if(this.health < this.maxHealth){
-      this.health += this.healthRegeneration;
-    }
 
-    if(this.mana < this.maxMana){
-      this.mana += this.manaRegeneration;
-    }
   };
 
 }
@@ -105,8 +100,8 @@ class Hulk extends Enemy{
     // super(playersInMap,enemiesData,tableOfSockets,statics,id,EnemySprites.hulk,x,y,callbackOnDeath,100,100,25)
     this.type = "hulk";
     this.experience = 300000000;
-    this.health = 3000;
-    this.maxHealth = 3000;
+    this.health = 100;
+    this.maxHealth = 100;
     this.damage = 15;
   }
 }
