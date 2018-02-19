@@ -75,7 +75,7 @@ class Enemy{
       return;
     }
 
-    if(this.health < 0){
+    if(this.health <= 0){
       this.health = -1;
       this.dying = true;
       return;
@@ -91,11 +91,11 @@ class Enemy{
 class Hit extends Enemy{
 
 	constructor(id,x,y,callbackOnDeath){
-    super(id,x,y,EnemySprites.hit,callbackOnDeath)
+    super(id,x,y,EnemySprites.hit,callbackOnDeath);
     this.type = "hit";
     this.experience = 2000;
-    this.health = 1500;
-    this.maxHealth = 1500;
+    this.health = 130;
+    this.maxHealth = 130;
     this.damage = 5;
   }
 
@@ -103,8 +103,7 @@ class Hit extends Enemy{
 
 class Hulk extends Enemy{
   constructor(id,x,y,callbackOnDeath){
-    super(id,x,y,EnemySprites.hulk,callbackOnDeath,100,100,25)//,width,height,collisionHeight,collisionWidth,health,damage,mana
-    // super(playersInMap,enemiesData,tableOfSockets,statics,id,EnemySprites.hulk,x,y,callbackOnDeath,100,100,25)
+    super(id,x,y,EnemySprites.hulk,callbackOnDeath,100,100,25);
     this.type = "hulk";
     this.experience = 300000000;
     this.health = 100;

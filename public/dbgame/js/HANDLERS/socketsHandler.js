@@ -31,6 +31,8 @@ class SocketHandler{
 
           if(data.fight && data.fight[playerID]){
             handler.character.isFighting = true;
+            handler.character.idle = handler.character.idleDown;
+            handler.character.currentSprite = handler.character.idle;
             handler.character.opponent = handler.enemies[data.fight[playerID].enemyID];
             handler.fightData = {};
             handler.fightData.currentFightTick = data.fight[playerID].currentFightTick;
@@ -47,10 +49,28 @@ class SocketHandler{
               handler.fightData.turn = data.fightMove[playerID].turn;
             }
             handler.fightData.currentFightTick = data.fightMove[playerID].currentFightTick;
+
+            if(data.fightMove[playerID].player){
+              if(data.fightMove[playerID].player.health){
+                handler.character.health = data.fightMove[playerID].player.health;
+              }
+              if(data.fightMove[playerID].player.playerSkillData){
+                handler.fightData.playerSkillData = data.fightMove[playerID].player.playerSkillData;
+                handler.fightData.skill = new Skill(data.fightMove[playerID].player.playerSkillData.frameTable,handler);
+                handler.fightData.explosion = new Skill(data.fightMove[playerID].player.playerSkillData.detonationTable,handler);
+                console.log("changed explosion :c");
+                handler.character.isUsingSkill = true;
+              }
+            }
+
+            if(data.fightMove[playerID].opponent){
+              handler.character.opponent.health = data.fightMove[playerID].opponent.health;
+            }
           }
 
           if(data.fightResult && data.fightResult[playerID]){
             handler.character.isFighting = false;
+            handler.character.isUsingSkill = false;
             handler.character.opponent = {};
             handler.fightData = {};
             Game.onResize();
@@ -58,8 +78,6 @@ class SocketHandler{
 
           if(data.playersData[playerID].statics){
             handler.statics = [];
-            console.log("GOT STATICS DATA");
-            //handler.statics = data.playersData[playerID].statics;
             var staticData = data.playersData[playerID].statics;
             for(var i=0;i<staticData.length;i++){
               var staticEntity;
@@ -70,9 +88,6 @@ class SocketHandler{
                   staticEntity = new StaticEntity(handler,staticData[i]);
                 }
 
-
-              // staticEntity.renderX += handler.currentMap.moveX;
-              // staticEntity.renderY += handler.currentMap.moveY;
               handler.statics.push(staticEntity);
             }
           }
@@ -108,7 +123,7 @@ class SocketHandler{
         }
 
         if(!handler.enemies[enemyID]){
-          handler.enemies[enemyID] = new Hulk(handler,enemyID,data.enemiesData[enemyID].x,data.enemiesData[enemyID].y)
+          handler.enemies[enemyID] = new Hit(handler,enemyID,data.enemiesData[enemyID].x,data.enemiesData[enemyID].y)
         }
 
         handler.enemies[enemyID].x = data.enemiesData[enemyID].x;
@@ -121,6 +136,7 @@ class SocketHandler{
           handler.enemies[enemyID].collisionWidth = data.enemiesData[enemyID].collisionWidth;
           handler.enemies[enemyID].collisionHeight = data.enemiesData[enemyID].collisionHeight;
           handler.enemies[enemyID].health = data.enemiesData[enemyID].health;
+          handler.enemies[enemyID].maxHealth = data.enemiesData[enemyID].maxHealth;
         }
 
 

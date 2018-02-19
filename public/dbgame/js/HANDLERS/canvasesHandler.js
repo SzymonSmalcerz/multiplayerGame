@@ -1,20 +1,18 @@
-class CanvasesHandler{
+ class CanvasesHandler{
   constructor(handler){
     this.handler = handler;
   }
 
   setCanvases(){
 
-    //collision canvas
-    this.handler.collisionCanvas = document.getElementById("ccoll");
-    if(!this.handler.collisionCanvas){
+    //parent dib
+    this.handler.parentDiv = document.getElementById("pDiv");
+    if(!this.handler.parentDiv){
 
-      this.handler.collisionCanvas = document.createElement("canvas");
-      this.handler.collisionCanvas.setAttribute("id", "ccoll");
+      this.handler.parentDiv = document.createElement("div");
+      this.handler.parentDiv.setAttribute("id", "pDiv");
     }
-
-    this.handler.collisionCtx = this.handler.collisionCanvas.getContext('2d');
-
+    document.body.appendChild(this.handler.parentDiv);
 
     //main canvas
     this.handler.canvas = document.getElementById("cnorm");
@@ -25,10 +23,15 @@ class CanvasesHandler{
     }
 
     this.handler.ctx = this.handler.canvas.getContext('2d');
-    // this.handler.ctx.imageSmoothingEnabled = false;
-    // this.handler.ctx.oImageSmoothingEnabled = false;
-    // this.handler.ctx.webkitImageSmoothingEnabled = false;
+    this.handler.ctx.imageSmoothingEnabled = true;
+    this.handler.ctx.oImageSmoothingEnabled = true;
+    this.handler.ctx.webkitImageSmoothingEnabled = true;
 
+
+
+    this.handler.parentDiv.appendChild(this.handler.canvas);
+
+    this.setWidthAndHeightOfCanvases();
     var handler = this.handler;
     this.handler.canvas.addEventListener('click', function(event) {
 
@@ -48,10 +51,20 @@ class CanvasesHandler{
         if(Helper.getDistanceBetweenTwo2DPoints(clickPoint,enemyCenter) < handler.enemies[enemyID].collisionWidth){
             var distance = Helper.getDistanceBetweenTwo2DPoints(playerCenter,enemyCenter);
 
+
             if(distance < handler.character.width + handler.enemies[enemyID].width/2){
               handler.dataToSend.fight = {
                 enemyID : enemyID
               };
+
+              var button = document.createElement("button");
+              button.setAttribute("id", "button1");
+              button.setAttribute("width", "100px");
+              button.setAttribute("height", "100px");
+              button.setAttribute("position", "absolute");
+              button.setAttribute("right", "25%");
+              button.setAttribute("top", "25%");
+              handler.parentDiv.appendChild(button);
             }
 
             break;
@@ -62,33 +75,16 @@ class CanvasesHandler{
       }
 
     });
-
-    document.body.appendChild(this.handler.collisionCanvas);
-    document.body.appendChild(this.handler.canvas);
-    // document.body.appendChild(this.handler.collisionCanvas)
-
-    this.setWidthAndHeightOfCanvases();
   }
 
   setWidthAndHeightOfCanvases(){
-    // this.handler.canvas.setAttribute("left", String(-window.innerWidth/4));
-    // this.handler.collisionCanvas.setAttribute("left", String(-window.innerWidth/4));
-    // this.handler.canvas.setAttribute("top", String(-window.innerHeight/10));
-    // this.handler.collisionCanvas.setAttribute("top", String(-window.innerHeight/10));
 
+    
 
-    this.handler.canvas.setAttribute("right", "25%");
-    this.handler.canvas.setAttribute("top", "10%");
-    this.handler.canvas.setAttribute("width", "50%");
-    this.handler.collisionCanvas.setAttribute("right", "25%");
-    this.handler.collisionCanvas.setAttribute("top", "10%");
-    this.handler.collisionCanvas.setAttribute("width", "50%");
 
     this.handler.gameCanvasesWidth = window.innerWidth/2;
     this.handler.gameCanvasesHeight = window.innerHeight/10 * 8;
     this.handler.canvas.width = this.handler.gameCanvasesWidth;
     this.handler.canvas.height = this.handler.gameCanvasesHeight;
-    this.handler.collisionCanvas.width = this.handler.gameCanvasesWidth;
-    this.handler.collisionCanvas.height = this.handler.gameCanvasesHeight;
   }
 }

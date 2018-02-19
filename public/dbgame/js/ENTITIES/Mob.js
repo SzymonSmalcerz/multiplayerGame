@@ -74,7 +74,13 @@ class Mob extends Entity{
 
   }
 
+  drawHp(x,y,width,height){
+    this.handler.ctx.fillStyle = "rgb(90,0,0)";
+    this.handler.ctx.fillRect(x,y, width,	height);
 
-  
+    this.handler.ctx.fillStyle = "rgb(255,0,0)";
+    this.handler.ctx.fillRect(x,y, width * this.health/this.maxHealth,height-2);
+  }
+
 
 }

@@ -20,6 +20,7 @@ window.onload = function(){
 
 const Game = {
   handler : {
+    parentDiv : undefined,
 		canvas : undefined,
 		ctx : undefined,
 		currentMap : undefined,
@@ -57,6 +58,9 @@ const Game = {
 
     this.handler.camera.handleMoveXandMoveY();
     this.handleTilesLevelsAndOther();
+
+
+    this.handler.drawer = new Drawer(this.handler);
 
     socket.emit("initialized", {id : Game.handler.character.id});
     setTimeout(Game.mainLoop,1000);
@@ -100,7 +104,7 @@ const Game = {
     Game.init();
   },
   onResize(){
-    
+
     if(Game.handler.canvasesHandler){
       Game.handler.canvasesHandler.setWidthAndHeightOfCanvases();
       Game.handler.camera.handleMoveXandMoveY();

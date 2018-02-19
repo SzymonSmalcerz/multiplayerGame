@@ -18,6 +18,7 @@ class MainCharacter extends Mob{
     this.setSprites();
 
     this.isFighting = false;
+    this.isUsingSkill = false;
     this.hasJustMadeMoveInFight = false;
 
     this.requiredExperience = playerData.requiredExperience;
@@ -30,6 +31,8 @@ class MainCharacter extends Mob{
     this.height = 32;
     this.collisionHeight = 11;
     this.collisionWidth = 11;
+
+
 
 
     this.movesStack = [];
@@ -59,6 +62,12 @@ class MainCharacter extends Mob{
       keyHandler["49"] = false;
       this.handler.dataToSend.fightMove = {
         move : "normal"
+      }
+      this.hasJustMadeMoveInFight = true;
+    }else if(keyHandler["50"]){
+      keyHandler["50"] = false;
+      this.handler.dataToSend.fightMove = {
+        move : "kamehame"
       }
       this.hasJustMadeMoveInFight = true;
     }
@@ -160,6 +169,7 @@ class MainCharacter extends Mob{
     this.idleLeft = [{x:2,y:2}];
     this.idleUp = [{x:0,y:2}];
     this.idle = this.idleDown;
+    this.KamehamehaWaveSprite = [{x:3,y:8}];
   }
 
   manageKeyPressing(){

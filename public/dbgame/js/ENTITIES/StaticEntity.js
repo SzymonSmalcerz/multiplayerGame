@@ -39,11 +39,6 @@ class StaticEntity extends Entity{
   							   this.widthInImage,this.heightInImage,												// width and height of particular image in sprite
   							   this.renderX,this.renderY,											// x and y on the screen
   							   this.width,this.height);		// width and height of the particular image on the
-                   this.handler.collisionCtx.fillStyle = "rgba(1,0,0,1.0)";
-
-
-    //this.handler.collisionCtx.fillRect((this.renderX + (this.width - this.collisionWidth)/2),(this.renderY + (this.height - this.collisionHeight - this.height/10)), this.collisionWidth, this.collisionHeight);
-
 
   };
 
