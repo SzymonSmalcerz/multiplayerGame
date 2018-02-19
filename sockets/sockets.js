@@ -110,6 +110,8 @@ socket.on("data",(data) => {
 
   if(data.fight){
     maps[findMapNameByPlayerId[data.character.id]].handleFight(data.character.id,data.fight.enemyID);
+
+    console.log(data.fight.typeOfFight);
   }
 
   if(data.fightMove){
