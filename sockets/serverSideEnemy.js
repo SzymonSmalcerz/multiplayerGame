@@ -26,6 +26,12 @@ class Enemy{
   	this.dying_SpriteTable = moveSprite.dying_SpriteTable || moveSprite.idle;
   	this.dead_SpriteTable = moveSprite.dead_SpriteTable || moveSprite.idle;
     this.currentSprite = this.idle;
+    this.fightSprite = moveSprite.left_fight;
+    this.moveLeft = moveSprite.left;
+    this.moveRight = moveSprite.right;
+
+    this.currentFightTick = 36;
+    this.maxFightTick = 36;
 
 
     //PHYSICS AND LOGIC THINGS BELOW
@@ -42,6 +48,7 @@ class Enemy{
     this.experience = 10;
 
     this.dead = false;
+    this.dying = false;
 
     this.set = false;
 
@@ -70,7 +77,7 @@ class Enemy{
 
     if(this.health < 0){
       this.health = -1;
-      this.dead = true;
+      this.dying = true;
       return;
     }
 

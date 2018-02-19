@@ -36,6 +36,7 @@ const Game = {
     socketHandler : undefined,
     canvasesHandler : undefined,
     dataToSend : {},
+    fightData : {},
 
 
 		//technicals
@@ -92,17 +93,20 @@ const Game = {
     this.handler.character = new MainCharacter(this.handler, playerData);
   },
   setCurrentMap : function(mapData){
-    //creating cavas is need for map to exist so we must create canvasses before creating map
+    //creating cavas is needed for map to exist so we must create canvasses before creating map
     this.handler.canvasesHandler = new CanvasesHandler(this.handler);
     this.handler.canvasesHandler.setCanvases();
-    console.log("got map data: " + mapData);
     this.handler.currentMap = new Map(this.handler, mapData);
     Game.init();
   },
   onResize(){
-    Game.handler.canvasesHandler.setWidthAndHeightOfCanvases();
-    Game.handler.camera.handleMoveXandMoveY();
-    Game.handler.currentMap.onResize();
+    
+    if(Game.handler.canvasesHandler){
+      Game.handler.canvasesHandler.setWidthAndHeightOfCanvases();
+      Game.handler.camera.handleMoveXandMoveY();
+      Game.handler.currentMap.onResize();
+    }
+
   }
 
 }

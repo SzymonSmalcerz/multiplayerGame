@@ -75,20 +75,63 @@ class Map{
 
       for(var i = 0;i <= this.rightBorderOfDisplayWindow/32 + 1; i++){
     		for(var j = 0;j <= this.bottomBorderOfDisplayWindow/32 + 1; j++){
-          // console.log(((this.bottomBorderOfDisplayWindow/32) + 2) + "VSS" + (this.bottomBorderOfDisplayWindow/32 + 2))
           tempTileContainer = this.handler.tiles[this.fightTile];
     		  tempTileContainer.draw(i*32, j*32);
     		}
     	}
-
       var player = this.handler.character;
       var enemy  = this.handler.character.opponent;
+      var fightData = this.handler.fightData;
 
-      player.renderX = this.rightBorderOfDisplayWindow * 0.25 - player.width/2;
+      console.log("fightData:" + fightData.turn);
+
+      var defaultOpponentPosition = this.rightBorderOfDisplayWindow * 0.65;
+      var defaultCharacterPosition = this.rightBorderOfDisplayWindow * 0.35;
+      if(this.handler.fightData.turn == "opponent"){
+        player.hasJustMadeMoveInFight = false;
+        if(fightData.currentFightTick > 2 * fightData.maxFightTick/3){
+          var ratio = 2*(fightData.maxFightTick-fightData.currentFightTick)/(fightData.maxFightTick);
+
+          enemy.renderX = defaultOpponentPosition - enemy.width/2 - ((defaultOpponentPosition - defaultCharacterPosition) *(ratio));
+          enemy.currentSprite = fightData.moveLeft;
+        }else if(fightData.currentFightTick > fightData.maxFightTick/3){
+          enemy.renderX = defaultCharacterPosition - player.width/2;
+          enemy.currentSprite = fightData.fightSprite;
+        }else{
+          var ratio = ((fightData.maxFightTick-fightData.currentFightTick) - 2/3 * (fightData.maxFightTick))/(fightData.maxFightTick/3);
+          enemy.renderX = defaultCharacterPosition - enemy.width/2 + ((defaultOpponentPosition - defaultCharacterPosition)  * (ratio));
+          enemy.currentSprite = fightData.moveRight;
+        }
+      }else{
+        enemy.renderX = defaultOpponentPosition - enemy.width/2;
+        if(fightData.idle){
+          enemy.currentSprite = fightData.idle;
+        }
+      }
+      enemy.renderY = this.bottomBorderOfDisplayWindow * 0.5 - enemy.height/2;
+
+      if(player.hasJustMadeMoveInFight){
+        if(fightData.currentFightTick > 2 * fightData.maxFightTick/3){
+          var ratio = 2*(fightData.maxFightTick-fightData.currentFightTick)/(fightData.maxFightTick);
+          console.log("ratio:" + ratio);
+          player.renderX = defaultCharacterPosition - player.width/2 + ((defaultOpponentPosition - defaultCharacterPosition) *(ratio));
+          player.currentSprite = player.right;
+        }else if(fightData.currentFightTick > fightData.maxFightTick/3){
+          player.renderX = defaultOpponentPosition - enemy.width/2 - player.width/2;
+          player.currentSprite = player.right_fight;
+        }else{
+          var ratio = ((fightData.maxFightTick-fightData.currentFightTick) - 2/3 * (fightData.maxFightTick))/(fightData.maxFightTick/3);
+          player.renderX = defaultOpponentPosition - player.width/2 - ((defaultOpponentPosition - defaultCharacterPosition)  * (ratio));
+          player.currentSprite = player.left;
+        }
+      }else{
+        player.renderX = defaultCharacterPosition - player.width/2;
+        player.currentSprite = player.idle;
+      }
+
       player.renderY = this.bottomBorderOfDisplayWindow * 0.5 - player.height/2;
 
-      enemy.renderX = this.rightBorderOfDisplayWindow * 0.75 - enemy.width/2;
-      enemy.renderY = this.bottomBorderOfDisplayWindow * 0.5 - enemy.height/2;
+
 
       player.draw();
       enemy.draw();

@@ -27,14 +27,32 @@ class SocketHandler{
 
         if(handler.character.id == playerID){
 
+
+
           if(data.fight && data.fight[playerID]){
             handler.character.isFighting = true;
             handler.character.opponent = handler.enemies[data.fight[playerID].enemyID];
+            handler.fightData = {};
+            handler.fightData.currentFightTick = data.fight[playerID].currentFightTick;
+            handler.fightData.maxFightTick = data.fight[playerID].maxFightTick;
+            handler.fightData.idle = data.fight[playerID].idle;
+            handler.fightData.moveLeft = data.fight[playerID].moveLeft;
+            handler.fightData.fightSprite = data.fight[playerID].fightSprite;
+            handler.fightData.moveRight = data.fight[playerID].moveRight;
+            handler.fightData.turn = data.fight[playerID].turn;
           }
 
-          if(data.fightResult){
+          if(data.fightMove && data.fightMove[playerID]){
+            if(data.fightMove[playerID].turn){
+              handler.fightData.turn = data.fightMove[playerID].turn;
+            }
+            handler.fightData.currentFightTick = data.fightMove[playerID].currentFightTick;
+          }
+
+          if(data.fightResult && data.fightResult[playerID]){
             handler.character.isFighting = false;
             handler.character.opponent = {};
+            handler.fightData = {};
             Game.onResize();
           }
 

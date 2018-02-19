@@ -18,6 +18,7 @@ class MainCharacter extends Mob{
     this.setSprites();
 
     this.isFighting = false;
+    this.hasJustMadeMoveInFight = false;
 
     this.requiredExperience = playerData.requiredExperience;
     this.speed = playerData.speed;
@@ -55,12 +56,11 @@ class MainCharacter extends Mob{
 
   manageFighting(){
     if(keyHandler["49"]){
-      console.log("player wants to attack");
       keyHandler["49"] = false;
-
       this.handler.dataToSend.fightMove = {
         move : "normal"
       }
+      this.hasJustMadeMoveInFight = true;
     }
   }
 

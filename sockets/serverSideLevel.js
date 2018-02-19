@@ -27,49 +27,96 @@ class Map{
 
   tick(){
 
+    //fightTick
+    this.fightTick();
+
+    //add enemies etc
     this.checkForEnemies();
 
+    //prepare data which will be send to client
+    this.setEnemiesDataToSend();
+    this.setPlayersDataToSend();
+
+    //send data to client
+    this.sendData();
+
+    //reset variables and prepare them to next tick()
+    this.resetDataToSend();
 
 
-    var enemiesData = {};
-    var tempEnemies = this.enemies;
-    for (var enemyID in tempEnemies) {
+  }
 
-        if (!tempEnemies.hasOwnProperty(enemyID)) continue;
+  sendData(){
+    var tempPlayers = this.players;
+    for (var playerID in tempPlayers) {
 
-        tempEnemies[enemyID].tick();
-        enemiesData[enemyID] = {};
-        if(tempEnemies[enemyID].dead){
-          this.tableOfRemovedEnemies.push(enemyID);
-          enemiesData[enemyID].remove = true;
-          continue;
-        }
+        if (!tempPlayers.hasOwnProperty(playerID)) continue;
 
-        if(this.setEnemies && this.tableOfSendedEnemies[enemyID]){
-          enemiesData[enemyID] = {
-            id : enemyID,
-            x : tempEnemies[enemyID].x,
-            y : tempEnemies[enemyID].y,
-            currentSprite : tempEnemies[enemyID].currentSprite
-          }
-        }else{
-          enemiesData[enemyID] = {
-            id : enemyID,
-            x : tempEnemies[enemyID].x,
-            y : tempEnemies[enemyID].y,
-            currentSprite : tempEnemies[enemyID].currentSprite,
-            fighting : tempEnemies[enemyID].fighting,
-            width : tempEnemies[enemyID].width,
-            height : tempEnemies[enemyID].height,
-            collisionWidth : tempEnemies[enemyID].collisionWidth,
-            collisionHeight : tempEnemies[enemyID].collisionHeight,
-            health : tempEnemies[enemyID].health
-          }
-          this.tableOfSendedEnemies[enemyID] = true;
-        }
+        this.socketTable[playerID].emit("mapData",this.dataToSend)
+
     }
-    this.setEnemies = true;
+  }
 
+  resetDataToSend(){
+    this.dataToSend = {};
+
+    for(var i=0;i<this.tableOfRemovedEnemies.length;i++){
+      delete this.tableOfSendedEnemies[this.tableOfRemovedEnemies[i]];
+      delete this.enemies[this.tableOfRemovedEnemies[i]];
+    }
+
+    this.tableOfRemovedPlayers = {};
+    this.tableOfRemovedEnemies = [];
+  }
+
+  setEnemiesDataToSend(){
+
+
+        var enemiesData = {};
+        var tempEnemies = this.enemies;
+        for (var enemyID in tempEnemies) {
+
+            if (!tempEnemies.hasOwnProperty(enemyID)) continue;
+
+            tempEnemies[enemyID].tick();
+            enemiesData[enemyID] = {};
+            if(tempEnemies[enemyID].dead){
+              this.tableOfRemovedEnemies.push(enemyID);
+              enemiesData[enemyID].remove = true;
+              continue;
+            }
+
+            if(this.setEnemies && this.tableOfSendedEnemies[enemyID]){
+              enemiesData[enemyID] = {
+                id : enemyID,
+                x : tempEnemies[enemyID].x,
+                y : tempEnemies[enemyID].y,
+                currentSprite : tempEnemies[enemyID].currentSprite
+              }
+            }else{
+              enemiesData[enemyID] = {
+                id : enemyID,
+                x : tempEnemies[enemyID].x,
+                y : tempEnemies[enemyID].y,
+                currentSprite : tempEnemies[enemyID].currentSprite,
+                fighting : tempEnemies[enemyID].fighting,
+                width : tempEnemies[enemyID].width,
+                height : tempEnemies[enemyID].height,
+                collisionWidth : tempEnemies[enemyID].collisionWidth,
+                collisionHeight : tempEnemies[enemyID].collisionHeight,
+                health : tempEnemies[enemyID].health
+              }
+              this.tableOfSendedEnemies[enemyID] = true;
+            }
+        }
+        this.setEnemies = true;
+
+
+        this.dataToSend.enemiesData = enemiesData;
+
+  }
+
+  setPlayersDataToSend(){
     var playersData = {};
     var tempPlayers = this.players;
 
@@ -102,26 +149,6 @@ class Map{
     }
 
     this.dataToSend.playersData = playersData;
-    this.dataToSend.enemiesData = enemiesData;
-
-    for (var playerID in tempPlayers) {
-
-        if (!tempPlayers.hasOwnProperty(playerID)) continue;
-
-        this.socketTable[playerID].emit("mapData",this.dataToSend)
-
-    }
-    this.dataToSend = {};
-
-    for(var i=0;i<this.tableOfRemovedEnemies.length;i++){
-      delete this.tableOfSendedEnemies[this.tableOfRemovedEnemies[i]];
-      delete this.enemies[this.tableOfRemovedEnemies[i]];
-    }
-
-    this.tableOfRemovedPlayers = {};
-    this.tableOfRemovedEnemies = [];
-
-
   }
 
 
@@ -167,12 +194,11 @@ class Map{
 
     handleFight(playerID,enemyID){
 
-      console.log("0");
-
       if(this.enemies[enemyID].fighting || this.enemies[enemyID].dead){
         return;
       }
-
+      this.enemies[enemyID].currentFightTick = this.enemies[enemyID].maxFightTick;
+      this.enemies[enemyID].currentSprite = this.enemies[enemyID].fightSprite;
       var playerCenter = Helper.getCenterOfEntity({
         x : this.players[playerID].x,
         y : this.players[playerID].y,
@@ -181,21 +207,118 @@ class Map{
       });
       var enemyCenter = Helper.getCenterOfEntity(this.enemies[enemyID]);
       var distance = Helper.getDistanceBetweenTwo2DPoints(playerCenter,enemyCenter);
-      console.log("1");
+
       if(distance < this.players[playerID].width + this.enemies[enemyID].width/2){
-        console.log("2");
-        this.dataToSend.fight = {};
+        if(!this.dataToSend.fight){
+          this.dataToSend.fight = {};
+        }
+        var enemy = this.enemies[enemyID];
         this.dataToSend.fight[playerID] = {};
         this.dataToSend.fight[playerID].enemyID = enemyID;
+        this.dataToSend.fight[playerID].currentFightTick = enemy.currentFightTick;
+        this.dataToSend.fight[playerID].maxFightTick = enemy.maxFightTick;
+        this.dataToSend.fight[playerID].idle = enemy.idle;
+        this.dataToSend.fight[playerID].moveLeft = enemy.moveLeft;
+        this.dataToSend.fight[playerID].fightSprite = enemy.fightSprite;
+        this.dataToSend.fight[playerID].moveRight = enemy.moveRight;
+        this.dataToSend.fight[playerID].turn = "player";
+
         this.fight[playerID] = {};
         this.fight[playerID].turn = "player";
-        this.fight[playerID].opponentID = enemyID;
+        this.fight[playerID].opponentID = enemyID
+        this.fight[playerID].currentFightTick = enemy.currentFightTick;
+        this.fight[playerID].maxFightTick = enemy.maxFightTick;
 
         this.enemies[enemyID].fighting = true;
         this.enemies[enemyID].opponentID = playerID;
       }
 
-      console.log("3");
+    }
+
+
+    fightTick(){
+
+      for (var playerID in this.fight) {
+
+        if (!this.fight.hasOwnProperty(playerID)) continue;
+
+        if(this.fight[playerID].turn == "opponent"){
+          var enemy = this.enemies[this.fight[playerID].opponentID];
+          this.fight[playerID].currentFightTick -= 1;
+          if(!this.dataToSend.fightMove){
+            this.dataToSend.fightMove = {};
+          }
+          this.dataToSend.fightMove[playerID] = {};
+          this.dataToSend.fightMove[playerID].currentFightTick = this.fight[playerID].currentFightTick;
+
+          if(this.fight[playerID].currentFightTick<=this.fight[playerID].maxFightTick/2 && !this.fight[playerID].damaged){
+            this.players[playerID].health -= enemy.damage;
+            this.fight[playerID].damaged = true;
+            console.log("player got damage");
+          }
+
+
+          if(this.fight[playerID].currentFightTick <= 0){
+            //do something
+            console.log("player turn!");
+            this.changeMove(playerID);
+          }
+
+        }else if(this.fight[playerID].turn == "none"){
+
+
+          this.fight[playerID].currentFightTick-=1;
+          this.dataToSend.fightMove = this.dataToSend.fightMove || {};
+          this.dataToSend.fightMove[playerID] = {};
+          this.dataToSend.fightMove[playerID].currentFightTick = this.fight[playerID].currentFightTick;
+          if(this.fight[playerID].currentFightTick<=this.fight[playerID].maxFightTick/2 && !this.fight[playerID].damaged){
+            var opponent = this.enemies[this.fight[playerID].opponentID];
+            this.fight[playerID].damageFromPlayer = 0;
+            this.fight[playerID].damaged = true;
+            opponent.health -= this.players[playerID].attack;
+            console.log("opponent got damage");
+            opponent.tick();
+            if(!this.dataToSend.fightMove){
+              this.dataToSend.fightMove = {};
+            }
+            this.dataToSend.fightMove[playerID] = {};
+            this.dataToSend.fightMove[playerID].opponenet = {};
+            this.dataToSend.fightMove[playerID].opponenet.health = opponent.health;
+            this.dataToSend.fightMove[playerID].currentFightTick = this.fight[playerID].currentFightTick;
+          }else if(this.fight[playerID].currentFightTick<=0){
+            var opponent = this.enemies[this.fight[playerID].opponentID];
+            if(opponent.dying){
+              opponent.dead = true;
+              opponent.onDie();
+              delete this.fight[playerID];
+              if(!this.dataToSend.fightResult){
+                this.dataToSend.fightResult = {};
+              }
+              this.dataToSend.fightResult[playerID] = true;
+            }else{
+              this.changeMove(playerID);
+            }
+          }
+        }
+      }
+    }
+
+    changeMove(playerID){
+      if(!this.dataToSend.fightMove){
+        this.dataToSend.fightMove = {};
+      }
+      if(this.fight[playerID].turn == "none"){
+        this.fight[playerID].turn = "opponent";
+        this.dataToSend.fightMove[playerID].turn = "opponent";
+      }else{
+        this.fight[playerID].turn = "player";
+        this.dataToSend.fightMove[playerID].turn = "player";
+      }
+
+      this.fight[playerID].damaged = false;
+      this.fight[playerID].currentFightTick = this.fight[playerID].maxFightTick;
+      this.dataToSend.fightMove[playerID] = {};
+      this.dataToSend.fightMove[playerID].currentFightTick = this.fight[playerID].maxFightTick;
 
     }
 
@@ -205,21 +328,16 @@ class Map{
         return;
       }
 
+
       var opponent = this.enemies[this.fight[playerID].opponentID];
 
+      this.fight[playerID].turn = "none";
+      this.fight[playerID].damaged = false;
+      this.fight[playerID].currentFightTick = this.fight[playerID].maxFightTick;
+
       if(fightData.move == "normal"){
-        opponent.health -= this.players[playerID].attack;
+        this.fight[playerID].damageFromPlayer = this.players[playerID].attack;
       }
-
-
-      opponent.tick();
-      if(opponent.dead){
-        opponent.onDie();
-        delete this.fight[playerID];
-        this.dataToSend.fightResult = true;
-      }
-
-
 
     }
 
@@ -250,8 +368,8 @@ class FirstMap extends Map{
     this.respawnFrame += 1;
     if(this.numberOfHulks < 2 && this.respawnFrame > 1){
       this.respawnFrame = 0;
-      var x = Math.floor(Math.random() * 600 + 200);
-      var y = Math.floor(Math.random() * 600 + 200);
+      var x = Math.floor(Math.random() * 150 + 20);
+      var y = Math.floor(Math.random() * 100 + 400);
       var tempID = "hu" + Math.floor(Math.random() * 1000000) + "fm";
       var here = this;
       this.enemies[tempID] = new Hulk(tempID,x,y,function(){

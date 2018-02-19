@@ -46,18 +46,15 @@ class CanvasesHandler{
           };
 
         if(Helper.getDistanceBetweenTwo2DPoints(clickPoint,enemyCenter) < handler.enemies[enemyID].collisionWidth){
-            console.log("clicked on enemy !");
             var distance = Helper.getDistanceBetweenTwo2DPoints(playerCenter,enemyCenter);
 
-            console.log("distance: " + distance);
-            console.log("handler.character.width: " + handler.character.width);
-            console.log("handler.enemies[enemyID].width/2: " + handler.enemies[enemyID].width/2);
             if(distance < handler.character.width + handler.enemies[enemyID].width/2){
-              console.log("start warrr !!!!");
               handler.dataToSend.fight = {
                 enemyID : enemyID
               };
             }
+
+            break;
           }
 
 
