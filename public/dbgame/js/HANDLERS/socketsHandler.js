@@ -32,8 +32,10 @@ class SocketHandler{
           if(data.fightData){
 
             var fightData = data.fightData;
+            
             if(fightData.fightInitialization){
-              console.log("FIGHT INITIALIZED");
+
+              handler.drawer.removeAllItems();
               handler.character.isFighting = true;
               handler.character.idle = handler.character.idleDown;
               handler.character.currentSprite = handler.character.idle;
@@ -46,6 +48,10 @@ class SocketHandler{
               handler.fightData.fightSprite = fightData.fightInitialization.fightSprite;
               handler.fightData.moveRight = fightData.fightInitialization.moveRight;
               handler.fightData.turn = fightData.fightInitialization.turn;
+
+
+              console.log("FIGHT INITIALIZED");
+
             }
 
             if(fightData.fightMove){
@@ -77,6 +83,7 @@ class SocketHandler{
               handler.character.isFighting = false;
               handler.character.isUsingSkill = false;
               handler.character.opponent = {};
+              handler.character.hasJustMadeMoveInFight = false;
               handler.fightData = {};
               Game.onResize();
             }
@@ -84,6 +91,7 @@ class SocketHandler{
             if(fightData.win){
               handler.character.isUsingSkill = false;
               handler.drawer.drawWinDialog();
+              handler.fightData.maxFightTick = 0;
               Game.onResize();
             }
 

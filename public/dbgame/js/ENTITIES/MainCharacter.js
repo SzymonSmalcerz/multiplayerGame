@@ -44,17 +44,13 @@ class MainCharacter extends Mob{
 
     this.currentSprite = this.idle;
 
-    if(keyHandler["37"] || keyHandler["38"] || keyHandler["39"] || keyHandler["40"] ){
-  		this.manageKeyPressing();
-      this.movesStack = [];
-  	}
-
     if(this.isFighting){
       this.manageFighting();
       this.movesStack = [];
-    }
-
-    if(this.movesStack.length>0){
+    }else if(keyHandler["37"] || keyHandler["38"] || keyHandler["39"] || keyHandler["40"] ){
+  		this.manageKeyPressing();
+      this.movesStack = [];
+  	}else if(this.movesStack.length>0){
       var move = this.movesStack.pop();
       if(move == "right"){
         this.move(this.speed,0);
@@ -66,6 +62,7 @@ class MainCharacter extends Mob{
         this.move(0,-(this.speed));
       }
     }
+
     this.fillDataToSend();
   }
 
@@ -182,6 +179,9 @@ class MainCharacter extends Mob{
     this.idleUp = [{x:0,y:2}];
     this.idle = this.idleDown;
     this.KamehamehaWaveSprite = [{x:3,y:8}];
+
+
+    this.currentSprite = this.idle;
   }
 
   manageKeyPressing(){
@@ -192,16 +192,19 @@ class MainCharacter extends Mob{
       }
     }else if(keyHandler["38"]	){
       this.idle = this.idleUp;
-      if(!this.isFighting)
+      if(!this.isFighting){
         this.move(0,-1);
+      }
     }else if(keyHandler["39"]	){
       this.idle = this.idleRight;
-      if(!this.isFighting)
+      if(!this.isFighting){
         this.move(1,0);
+      }
     }else if(keyHandler["40"]	){
       this.idle = this.idleDown;
-      if(!this.isFighting)
+      if(!this.isFighting){
         this.move(0,1);
+      }
     }
   }
 

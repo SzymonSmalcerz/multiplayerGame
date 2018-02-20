@@ -109,7 +109,7 @@ socket.on("data",(data) => {
   players[data.character.id].currentSprite = data.character.currentSprite;
 
   if(data.fight){
-    maps[findMapNameByPlayerId[data.character.id]].handleFight(data.character.id,data.fight.enemyID);
+    maps[findMapNameByPlayerId[data.character.id]].handleFight(data.character.id,data.fight.enemyID,data.fight.typeOfFight);
 
     console.log(data.fight.typeOfFight);
   }

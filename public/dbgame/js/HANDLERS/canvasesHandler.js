@@ -56,8 +56,19 @@
 
 
 
-    this.handler.gameCanvasesWidth = window.innerWidth/2;
-    this.handler.gameCanvasesHeight = window.innerHeight/10 * 8;
+    if(window.innerWidth < 400){
+      this.handler.parentDiv.width  = window.innerWidth;
+      this.handler.parentDiv.height  = window.innerHeight;
+      this.handler.parentDiv.style.top = "0";
+      this.handler.parentDiv.style.left = "0";
+    }else{
+      this.handler.parentDiv.width  = window.innerWidth/2;
+      this.handler.parentDiv.height  = window.innerHeight/10 * 8;
+      this.handler.parentDiv.style.top = "10%";
+      this.handler.parentDiv.style.left = "25%";
+    }
+    this.handler.gameCanvasesWidth = this.handler.parentDiv.width;
+    this.handler.gameCanvasesHeight = this.handler.parentDiv.height;
     this.handler.canvas.width = this.handler.gameCanvasesWidth;
     this.handler.canvas.height = this.handler.gameCanvasesHeight;
     // this.handler.collisionCanvas.width = this.handler.gameCanvasesWidth;

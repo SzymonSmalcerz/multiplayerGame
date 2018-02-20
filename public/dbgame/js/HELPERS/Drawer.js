@@ -23,6 +23,10 @@ class Drawer{
 
   }
 
+  removeAllItems(){
+    this.itemsToDraw = [];
+  }
+
   addItemToDraw(path,renderX, renderY, howLongImageMustLast, widthInImage, heightInImage,xPosInImage, yPosInImage, widthOnTheScreem, heightOnTheScreen){
 
     widthOnTheScreem = widthOnTheScreem || widthInImage;

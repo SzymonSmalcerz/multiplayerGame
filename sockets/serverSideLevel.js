@@ -3,6 +3,7 @@ const Static = require("./serverSideStatic");
 const MapTiles = require("./serverSideLevelTiles");
 const Helper = require("./Helper");
 const Skills = require("./serverSideSkill");
+const {CharacterSprites} = require("./Sprites");
 
 
 class Map{
@@ -202,13 +203,12 @@ class Map{
       //we call this function from tick, and any subclass of Map can fill body of this function for its own purpose
     }
 
-    handleFight(playerID,enemyID){
-
-      console.log("B: " + this.enemies[enemyID].currentSprite[0].y);
+    handleFight(playerID,enemyID,typeOfFight){
 
       if(this.enemies[enemyID].fighting || this.enemies[enemyID].dead || this.fight[playerID]){
         return;
       }
+
 
       var playerCenter = Helper.getCenterOfEntity({
         x : this.players[playerID].x,
@@ -223,33 +223,51 @@ class Map{
 
         this.enemies[enemyID].currentFightTick = this.enemies[enemyID].maxFightTick;
         this.enemies[enemyID].currentSprite = this.enemies[enemyID].fightSprite;
+        this.players[playerID].currentSprite = CharacterSprites.mainCharacter.idle;
         var enemy = this.enemies[enemyID];
 
+        if(typeOfFight == "fast"){
+          this.fight[playerID] = {};
+          this.fight[playerID].turn = "player";
+          this.fight[playerID].opponentID = enemyID
+          this.fight[playerID].currentFightTick = 0;
+          this.fight[playerID].maxFightTick = 0;
+
+          this.fight[playerID].dataToSend = {};
+          this.fight[playerID].dataToSend.fightInitialization = {};
+          this.fight[playerID].dataToSend.fightInitialization.enemyID = enemyID;
+          this.fight[playerID].dataToSend.fightInitialization.currentFightTick = this.fight[playerID].currentFightTick;
+          this.fight[playerID].dataToSend.fightInitialization.maxFightTick = this.fight[playerID].maxFightTick;
+          this.fight[playerID].dataToSend.fightInitialization.idle = enemy.idle;
+          this.fight[playerID].dataToSend.fightInitialization.moveLeft = enemy.moveLeft;
+          this.fight[playerID].dataToSend.fightInitialization.fightSprite = enemy.fightSprite;
+          this.fight[playerID].dataToSend.fightInitialization.moveRight = enemy.moveRight;
+          this.fight[playerID].dataToSend.fightInitialization.turn = "player";
+        }else{
+          this.fight[playerID] = {};
+          this.fight[playerID].turn = "player";
+          this.fight[playerID].opponentID = enemyID
+          this.fight[playerID].currentFightTick = enemy.currentFightTick;
+          this.fight[playerID].maxFightTick = enemy.maxFightTick;
+
+          this.fight[playerID].dataToSend = {};
+          this.fight[playerID].dataToSend.fightInitialization = {};
+          this.fight[playerID].dataToSend.fightInitialization.enemyID = enemyID;
+          this.fight[playerID].dataToSend.fightInitialization.currentFightTick = enemy.currentFightTick;
+          this.fight[playerID].dataToSend.fightInitialization.maxFightTick = enemy.maxFightTick;
+          this.fight[playerID].dataToSend.fightInitialization.idle = enemy.idle;
+          this.fight[playerID].dataToSend.fightInitialization.moveLeft = enemy.moveLeft;
+          this.fight[playerID].dataToSend.fightInitialization.fightSprite = enemy.fightSprite;
+          this.fight[playerID].dataToSend.fightInitialization.moveRight = enemy.moveRight;
+          this.fight[playerID].dataToSend.fightInitialization.turn = "player";
+        }
 
 
-        this.fight[playerID] = {};
-        this.fight[playerID].turn = "player";
-        this.fight[playerID].opponentID = enemyID
-        this.fight[playerID].currentFightTick = enemy.currentFightTick;
-        this.fight[playerID].maxFightTick = enemy.maxFightTick;
 
-        this.fight[playerID].dataToSend = {};
-        this.fight[playerID].dataToSend.fightInitialization = {};
-        this.fight[playerID].dataToSend.fightInitialization.enemyID = enemyID;
-        this.fight[playerID].dataToSend.fightInitialization.currentFightTick = enemy.currentFightTick;
-        this.fight[playerID].dataToSend.fightInitialization.maxFightTick = enemy.maxFightTick;
-        this.fight[playerID].dataToSend.fightInitialization.idle = enemy.idle;
-        this.fight[playerID].dataToSend.fightInitialization.moveLeft = enemy.moveLeft;
-        this.fight[playerID].dataToSend.fightInitialization.fightSprite = enemy.fightSprite;
-        this.fight[playerID].dataToSend.fightInitialization.moveRight = enemy.moveRight;
-        this.fight[playerID].dataToSend.fightInitialization.turn = "player";
 
         this.enemies[enemyID].fighting = true;
         this.enemies[enemyID].opponentID = playerID;
       }
-
-
-      console.log("A: " + this.enemies[enemyID].currentSprite[0].y);
 
     }
 

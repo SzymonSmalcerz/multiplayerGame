@@ -52,7 +52,7 @@ class FightHandler{
                   enemyID : enemyID,
                   typeOfFight: "normal"
                 };
-
+                event.stopPropagation();
                 handler.parentDiv.removeChild(buttonFastAttack);
                 handler.parentDiv.removeChild(this);
               });
@@ -62,7 +62,7 @@ class FightHandler{
                   enemyID : enemyID,
                   typeOfFight: "fast"
                 };
-
+                event.stopPropagation();
                 handler.parentDiv.removeChild(button);
                 handler.parentDiv.removeChild(this);
               });

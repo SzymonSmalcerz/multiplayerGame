@@ -99,7 +99,7 @@ class Map{
         var defaultOpponentPosition = this.rightBorderOfDisplayWindow * 0.80;
         var defaultCharacterPosition = this.rightBorderOfDisplayWindow * 0.20;
       }
-      if(this.handler.fightData.turn == "opponent"){
+      if(this.handler.fightData.turn == "opponent" && fightData.maxFightTick > 0){
         player.hasJustMadeMoveInFight = false;
         if(fightData.currentFightTick > 2 * fightData.maxFightTick/3){
           var ratio = 3*(fightData.maxFightTick-fightData.currentFightTick)/(fightData.maxFightTick);
@@ -121,7 +121,7 @@ class Map{
         }
       }
 
-      if(player.hasJustMadeMoveInFight){
+      if(player.hasJustMadeMoveInFight && fightData.maxFightTick > 0){
 
         if(!player.isUsingSkill){
           if(fightData.currentFightTick > 2 * fightData.maxFightTick/3){
