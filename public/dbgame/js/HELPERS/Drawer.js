@@ -34,6 +34,31 @@ class Drawer{
 
   }
 
+  drawWinDialog(){
+
+    var handler = this.handler;
+
+    var buttonWin = document.createElement("button");
+    buttonWin.setAttribute("id", "buttonWin");
+    buttonWin.textContent = "EndFight";
+    buttonWin.style.position = "absolute";
+    buttonWin.style.left = "50%";
+    buttonWin.style.top = "50%";
+    buttonWin.style.transform = "translate(-50%, -50%)";
+
+
+    handler.parentDiv.appendChild(buttonWin);
+
+    buttonWin.addEventListener('click',function(event){
+      handler.dataToSend.fightEnd = {
+        endOfFight : true,
+        enemyID : handler.character.opponent.id
+      };
+
+      handler.parentDiv.removeChild(this);
+    });
+  }
+
 }
 
 

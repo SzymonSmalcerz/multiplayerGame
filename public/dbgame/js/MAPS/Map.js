@@ -175,7 +175,7 @@ class Map{
 
 
 
-      if(fightData.turn == "player"){
+      if(fightData.turn != "opponent"){
         this.handler.ctx.fillStyle = "rgba(255,255,0,0.5)";
         this.handler.ctx.fillRect(0,0,this.rightBorderOfDisplayWindow/2,11 * this.bottomBorderOfDisplayWindow/50);
       }else {

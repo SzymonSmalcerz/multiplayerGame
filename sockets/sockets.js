@@ -114,6 +114,12 @@ socket.on("data",(data) => {
     console.log(data.fight.typeOfFight);
   }
 
+  if(data.fightEnd){
+    maps[findMapNameByPlayerId[data.character.id]].handleFightEnd(data.character.id,data.fightEnd.enemyID);
+
+    console.log("got info about ending fight");
+  }
+
   if(data.fightMove){
     maps[findMapNameByPlayerId[data.character.id]].handleFightMove(data.fightMove,data.character.id);
   }

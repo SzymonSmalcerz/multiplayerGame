@@ -54,6 +54,18 @@ class MainCharacter extends Mob{
       this.movesStack = [];
     }
 
+    if(this.movesStack.length>0){
+      var move = this.movesStack.pop();
+      if(move == "right"){
+        this.move(this.speed,0);
+      }else if(move == "left"){
+        this.move(-(this.speed),0);
+      }else if(move == "down"){
+        this.move(0,this.speed);
+      }else{
+        this.move(0,-(this.speed));
+      }
+    }
     this.fillDataToSend();
   }
 

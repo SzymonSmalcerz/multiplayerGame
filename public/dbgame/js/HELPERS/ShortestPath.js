@@ -1,10 +1,21 @@
 
 class ShortestPath{
 
-  constructor(drawer,widthOfDisplayWindow,heightOfDisplayWindow){
+  constructor(handler,drawer,widthOfDisplayWindow,heightOfDisplayWindow){
+    this.handler = handler;
     this.drawer = drawer;
     this.widthOfDisplayWindow = widthOfDisplayWindow;
     this.heightOfDisplayWindow = heightOfDisplayWindow;
+    handler.parentDiv.addEventListener("click", function(event){
+      if(handler.character.isFighting){
+        return;
+      }
+      var x = event.offsetX;
+      var y = event.offsetY;
+
+      Game.handler.shortestPath.calculateShortestPath(Game.handler.character, x, y, Game.handler.currentMap.allEntities);
+
+    });
   }
 
 
@@ -16,7 +27,7 @@ class ShortestPath{
     var sourceY = Math.round(mainEntity.renderY + mainEntity.height*0.9 - mainEntity.collisionHeight/2);
 
     var allEntities = entitesToAvoid;
-    var mockEntity = new Entity(mainEntity.x, mainEntity.y);
+    var mockEntity = new Entity(this.handler,mainEntity.x, mainEntity.y);
 
 
     mockEntity.renderX = sourceX;
@@ -36,26 +47,37 @@ class ShortestPath{
 
     var width = this.widthOfDisplayWindow;
     var height = this.heightOfDisplayWindow;
-    var leftBorderOfDisplayWindow = window.innerWidth/2 - width/2;
-    var rightBorderOfDisplayWindow = window.innerWidth/2 + width/2;
+    var leftBorderOfDisplayWindow = 0;
+    var rightBorderOfDisplayWindow = this.widthOfDisplayWindow;
 
-    var topBorderOfDisplayWindow = window.innerHeight/2 - height/2;
-    var bottomBorderOfDisplayWindow = window.innerHeight/2 + height/2;
+    var topBorderOfDisplayWindow = 0;
+    var bottomBorderOfDisplayWindow = this.heightOfDisplayWindow;
 
     var openList = [];
     var closedList = [];
 
     var nodes = {};
 
-    var leftBorder = this.calculateBorder(leftBorderOfDisplayWindow - mainEntity.width,change, sourceX);
-    var rightBorder = this.calculateBorder(rightBorderOfDisplayWindow + mainEntity.width,change, sourceX);
-    var topBorder = this.calculateBorder(topBorderOfDisplayWindow - mainEntity.height,change, sourceY);
-    var bottomBoreder = this.calculateBorder(bottomBorderOfDisplayWindow + mainEntity.height,change, sourceY);
-
+    var leftBorder = sourceX;
+    var rightBorder = sourceX;
+    var topBorder = sourceY;
+    var bottomBorder = sourceY;
+    while(leftBorder > leftBorderOfDisplayWindow){
+      leftBorder -= mainEntity.speed;
+    }
+    while(rightBorder < rightBorderOfDisplayWindow){
+      rightBorder += mainEntity.speed;
+    }
+    while(topBorder > topBorderOfDisplayWindow){
+      topBorder -= mainEntity.speed;
+    }
+    while(bottomBorder < bottomBorderOfDisplayWindow){
+      bottomBorder += mainEntity.speed;
+    }
 
 
     for(var w=leftBorder; w<= rightBorder ; w+=change){
-      for(var h=topBorder; h<=bottomBoreder; h+=change){
+      for(var h=topBorder; h<=bottomBorder; h+=change){
         nodes[w + " " + h] = {};
         nodes[w + " " + h].x = w;
         nodes[w + " " + h].y = h;
@@ -66,17 +88,16 @@ class ShortestPath{
           source = nodes[w + " " + h];
           source.g = 0;
           source.f = source.h;
-          // console.log("im here in setting source node!");
         }
 
         if(Math.abs(w - destinationX) <= mainEntity.speed/2 && Math.abs(h - destinationY) <= mainEntity.speed/2){
           destinationNode = nodes[w + " " + h];
-          // console.log("im here in setting destination node!");
         }
       }
     }
 
     var canMove = true;
+    var enemyFight = false;
 
     mockEntity.renderX = destinationNode.x - mainEntity.width/2;
     mockEntity.renderY = destinationNode.y - mainEntity.height*0.9 + mainEntity.collisionHeight/2;
@@ -88,17 +109,23 @@ class ShortestPath{
         return;
       }
       if(Helper.areTwoEntitiesInRange(mockEntity,entity)){
-        canMove = false;
+        if(entity instanceof Enemy ){
+          enemyFight = true;
+        }else{
+          canMove = false;
+        }
       }
     });
 
     // dbgame/js/dragonBallGame/sprites/crossMove.png"
 
     if(!canMove){
-      this.drawer.addItemToDraw("dbgame/js/dragonBallGame/sprites/crossMove.png",mockEntity.renderX, mockEntity.renderY, 500, 32, 32, 1, 0);
+      this.drawer.addItemToDraw("dbgame/js/SPRITES/crossMove.png",mockEntity.renderX, mockEntity.renderY, 500, 32, 32, 1, 0);
       return;
+    }else if(enemyFight){
+      this.drawer.addItemToDraw("dbgame/js/SPRITES/crossMove.png",mockEntity.renderX, mockEntity.renderY, 500, 32, 32, 2, 0);
     }else{
-      this.drawer.addItemToDraw("dbgame/js/dragonBallGame/sprites/crossMove.png",mockEntity.renderX, mockEntity.renderY, 500, 32, 32, 0, 0);
+      this.drawer.addItemToDraw("dbgame/js/SPRITES/crossMove.png",mockEntity.renderX, mockEntity.renderY, 500, 32, 32, 0, 0);
     }
 
 
@@ -137,7 +164,7 @@ class ShortestPath{
   						continue;
   					}
 
-            if(w>=leftBorder && w<rightBorder && h>=topBorder && h<bottomBoreder && !(h==q.y && w==q.x)) {
+            if(w>=leftBorder && w<rightBorder && h>=topBorder && h<bottomBorder && !(h==q.y && w==q.x)) {
 
 
               canMove = true;
@@ -153,7 +180,6 @@ class ShortestPath{
               });
 
               if(!canMove){
-              ///  console.log("wlasnie odrzucam bo mam collision");
   						 continue;
   						}
 
@@ -194,8 +220,7 @@ class ShortestPath{
 
 
     }
-    //
-    // console.log("couldnt find a way :C");
+
   }
 
   findNodeWithLowestF(openList){
@@ -220,16 +245,16 @@ class ShortestPath{
 
   drawWay(destinationNode,mainEntity){
 
-    var colorRandRed = Math.round(Math.random() * 150) + 100;
-    var colorGreenRed = Math.round(Math.random() * 150) + 100;
-    var colorBlueRed = Math.round(Math.random() * 150) + 100;
-    Game.handler.collisionCtx.fillStyle = "rgba("+colorRandRed+","+colorGreenRed+","+colorBlueRed+",0.5)";
-    while(destinationNode != null){
-
-      Game.handler.collisionCtx.fillRect(destinationNode.x-mainEntity.collisionWidth/2,destinationNode.y-mainEntity.collisionHeight/2,mainEntity.collisionWidth,mainEntity.collisionHeight);
-      destinationNode = destinationNode.parent;
-
-    }
+    // var colorRandRed = Math.round(Math.random() * 150) + 100;
+    // var colorGreenRed = Math.round(Math.random() * 150) + 100;
+    // var colorBlueRed = Math.round(Math.random() * 150) + 100;
+    // Game.handler.collisionCtx.fillStyle = "rgba("+colorRandRed+","+colorGreenRed+","+colorBlueRed+",0.5)";
+    // while(destinationNode != null){
+    //
+    //   Game.handler.collisionCtx.fillRect(destinationNode.x-mainEntity.collisionWidth/2,destinationNode.y-mainEntity.collisionHeight/2,mainEntity.collisionWidth,mainEntity.collisionHeight);
+    //   destinationNode = destinationNode.parent;
+    //
+    // }
   }
 
   createWay(destinationNode,mainEntity){

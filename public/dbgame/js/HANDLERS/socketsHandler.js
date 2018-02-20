@@ -29,52 +29,71 @@ class SocketHandler{
 
 
 
-          if(data.fight && data.fight[playerID]){
-            handler.character.isFighting = true;
-            handler.character.idle = handler.character.idleDown;
-            handler.character.currentSprite = handler.character.idle;
-            handler.character.opponent = handler.enemies[data.fight[playerID].enemyID];
-            handler.fightData = {};
-            handler.fightData.currentFightTick = data.fight[playerID].currentFightTick;
-            handler.fightData.maxFightTick = data.fight[playerID].maxFightTick;
-            handler.fightData.idle = data.fight[playerID].idle;
-            handler.fightData.moveLeft = data.fight[playerID].moveLeft;
-            handler.fightData.fightSprite = data.fight[playerID].fightSprite;
-            handler.fightData.moveRight = data.fight[playerID].moveRight;
-            handler.fightData.turn = data.fight[playerID].turn;
-          }
+          if(data.fightData){
 
-          if(data.fightMove && data.fightMove[playerID]){
-            if(data.fightMove[playerID].turn){
-              handler.fightData.turn = data.fightMove[playerID].turn;
+            var fightData = data.fightData;
+            if(fightData.fightInitialization){
+              console.log("FIGHT INITIALIZED");
+              handler.character.isFighting = true;
+              handler.character.idle = handler.character.idleDown;
+              handler.character.currentSprite = handler.character.idle;
+              handler.character.opponent = handler.enemies[fightData.fightInitialization.enemyID];
+              handler.fightData = {};
+              handler.fightData.currentFightTick = fightData.fightInitialization.currentFightTick;
+              handler.fightData.maxFightTick = fightData.fightInitialization.maxFightTick;
+              handler.fightData.idle = fightData.fightInitialization.idle;
+              handler.fightData.moveLeft = fightData.fightInitialization.moveLeft;
+              handler.fightData.fightSprite = fightData.fightInitialization.fightSprite;
+              handler.fightData.moveRight = fightData.fightInitialization.moveRight;
+              handler.fightData.turn = fightData.fightInitialization.turn;
             }
-            handler.fightData.currentFightTick = data.fightMove[playerID].currentFightTick;
 
-            if(data.fightMove[playerID].player){
-              if(data.fightMove[playerID].player.health){
-                handler.character.health = data.fightMove[playerID].player.health;
+            if(fightData.fightMove){
+              if(fightData.fightMove.turn){
+                handler.fightData.turn = fightData.fightMove.turn;
               }
-              if(data.fightMove[playerID].player.playerSkillData){
-                handler.fightData.playerSkillData = data.fightMove[playerID].player.playerSkillData;
-                handler.fightData.skill = new Skill(data.fightMove[playerID].player.playerSkillData.frameTable,handler);
-                handler.fightData.explosion = new Skill(data.fightMove[playerID].player.playerSkillData.detonationTable,handler);
-                console.log("changed explosion :c");
-                handler.character.isUsingSkill = true;
+
+              handler.fightData.currentFightTick = fightData.fightMove.currentFightTick;
+
+              if(fightData.fightMove.player){
+                if(fightData.fightMove.player.health){
+                  handler.character.health = fightData.fightMove.player.health;
+                }
+                if(fightData.fightMove.player.playerSkillData){
+                  handler.fightData.playerSkillData = fightData.fightMove.player.playerSkillData;
+                  handler.fightData.skill = new Skill(fightData.fightMove.player.playerSkillData.frameTable,handler);
+                  handler.fightData.explosion = new Skill(fightData.fightMove.player.playerSkillData.detonationTable,handler);
+                  console.log("changed explosion :c");
+                  handler.character.isUsingSkill = true;
+                }
+              }
+
+              if(fightData.fightMove.opponent){
+                handler.character.opponent.health = fightData.fightMove.opponent.health;
               }
             }
 
-            if(data.fightMove[playerID].opponent){
-              handler.character.opponent.health = data.fightMove[playerID].opponent.health;
+            if(fightData.fightResult){
+              handler.character.isFighting = false;
+              handler.character.isUsingSkill = false;
+              handler.character.opponent = {};
+              handler.fightData = {};
+              Game.onResize();
             }
+
+            if(fightData.win){
+              handler.character.isUsingSkill = false;
+              handler.drawer.drawWinDialog();
+              Game.onResize();
+            }
+
+
+
           }
 
-          if(data.fightResult && data.fightResult[playerID]){
-            handler.character.isFighting = false;
-            handler.character.isUsingSkill = false;
-            handler.character.opponent = {};
-            handler.fightData = {};
-            Game.onResize();
-          }
+
+
+
 
           if(data.playersData[playerID].statics){
             handler.statics = [];

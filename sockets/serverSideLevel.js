@@ -51,8 +51,17 @@ class Map{
     for (var playerID in tempPlayers) {
 
         if (!tempPlayers.hasOwnProperty(playerID)) continue;
-
+        if(this.fight[playerID]){
+          this.dataToSend.fightData = this.fight[playerID].dataToSend;
+          if(this.fight[playerID].dataToSend.fightResult){
+            delete this.fight[playerID];
+          }else{
+            this.fight[playerID].dataToSend = {};
+          }
+        }
         this.socketTable[playerID].emit("mapData",this.dataToSend)
+        this.dataToSend.fightData = {};
+
 
     }
   }
@@ -195,11 +204,12 @@ class Map{
 
     handleFight(playerID,enemyID){
 
+      console.log("B: " + this.enemies[enemyID].currentSprite[0].y);
+
       if(this.enemies[enemyID].fighting || this.enemies[enemyID].dead || this.fight[playerID]){
         return;
       }
-      this.enemies[enemyID].currentFightTick = this.enemies[enemyID].maxFightTick;
-      this.enemies[enemyID].currentSprite = this.enemies[enemyID].fightSprite;
+
       var playerCenter = Helper.getCenterOfEntity({
         x : this.players[playerID].x,
         y : this.players[playerID].y,
@@ -210,19 +220,12 @@ class Map{
       var distance = Helper.getDistanceBetweenTwo2DPoints(playerCenter,enemyCenter);
 
       if(distance < this.players[playerID].width + this.enemies[enemyID].width/2){
-        if(!this.dataToSend.fight){
-          this.dataToSend.fight = {};
-        }
+
+        this.enemies[enemyID].currentFightTick = this.enemies[enemyID].maxFightTick;
+        this.enemies[enemyID].currentSprite = this.enemies[enemyID].fightSprite;
         var enemy = this.enemies[enemyID];
-        this.dataToSend.fight[playerID] = {};
-        this.dataToSend.fight[playerID].enemyID = enemyID;
-        this.dataToSend.fight[playerID].currentFightTick = enemy.currentFightTick;
-        this.dataToSend.fight[playerID].maxFightTick = enemy.maxFightTick;
-        this.dataToSend.fight[playerID].idle = enemy.idle;
-        this.dataToSend.fight[playerID].moveLeft = enemy.moveLeft;
-        this.dataToSend.fight[playerID].fightSprite = enemy.fightSprite;
-        this.dataToSend.fight[playerID].moveRight = enemy.moveRight;
-        this.dataToSend.fight[playerID].turn = "player";
+
+
 
         this.fight[playerID] = {};
         this.fight[playerID].turn = "player";
@@ -230,9 +233,23 @@ class Map{
         this.fight[playerID].currentFightTick = enemy.currentFightTick;
         this.fight[playerID].maxFightTick = enemy.maxFightTick;
 
+        this.fight[playerID].dataToSend = {};
+        this.fight[playerID].dataToSend.fightInitialization = {};
+        this.fight[playerID].dataToSend.fightInitialization.enemyID = enemyID;
+        this.fight[playerID].dataToSend.fightInitialization.currentFightTick = enemy.currentFightTick;
+        this.fight[playerID].dataToSend.fightInitialization.maxFightTick = enemy.maxFightTick;
+        this.fight[playerID].dataToSend.fightInitialization.idle = enemy.idle;
+        this.fight[playerID].dataToSend.fightInitialization.moveLeft = enemy.moveLeft;
+        this.fight[playerID].dataToSend.fightInitialization.fightSprite = enemy.fightSprite;
+        this.fight[playerID].dataToSend.fightInitialization.moveRight = enemy.moveRight;
+        this.fight[playerID].dataToSend.fightInitialization.turn = "player";
+
         this.enemies[enemyID].fighting = true;
         this.enemies[enemyID].opponentID = playerID;
       }
+
+
+      console.log("A: " + this.enemies[enemyID].currentSprite[0].y);
 
     }
 
@@ -241,7 +258,7 @@ class Map{
 
       for (var playerID in this.fight) {
 
-        if (!this.fight.hasOwnProperty(playerID)) continue;
+        if (!this.fight.hasOwnProperty(playerID) || this.fight[playerID].endOfFight) continue;
 
         if(this.fight[playerID].turn == "opponent"){
 
@@ -251,8 +268,8 @@ class Map{
           if(this.fight[playerID].currentFightTick<=this.fight[playerID].maxFightTick/2 && !this.fight[playerID].damaged){
             this.players[playerID].health -= enemy.damage;
             this.fight[playerID].damaged = true;
-            this.dataToSend.fightMove[playerID].player = this.dataToSend.fightMove[playerID].player || {};
-            this.dataToSend.fightMove[playerID].player.health = this.players[playerID].health;
+            this.fight[playerID].dataToSend.fightMove.player = this.fight[playerID].dataToSend.fightMove.player || {};
+            this.fight[playerID].dataToSend.fightMove.player.health = this.players[playerID].health;
             console.log("player got damage");
           }
 
@@ -274,8 +291,8 @@ class Map{
             this.fight[playerID].damaged = true;
             this.fight[playerID].damageFromPlayer = 0;
             opponent.tick();
-            this.dataToSend.fightMove[playerID].opponent = {};
-            this.dataToSend.fightMove[playerID].opponent.health = opponent.health;
+            this.fight[playerID].dataToSend.fightMove.opponent = {};
+            this.fight[playerID].dataToSend.fightMove.opponent.health = opponent.health;
           }else if(this.fight[playerID].currentFightTick<=0){
             this.fight[playerID].skill = false;
             var opponent = this.enemies[this.fight[playerID].opponentID];
@@ -283,9 +300,8 @@ class Map{
               opponent.dead = true;
               opponent.onDie();
               console.log("opponent is dying");
-              delete this.fight[playerID];
-              this.dataToSend.fightResult = this.dataToSend.fightResult || {};
-              this.dataToSend.fightResult[playerID] = true;
+              this.fight[playerID].dataToSend.win = true;
+              this.fight[playerID].endOfFight = true;
             }else{
               this.changeMove(playerID);
             }
@@ -296,29 +312,29 @@ class Map{
 
     prepareFightMoveDataToSend(playerID){
       this.fight[playerID].currentFightTick -= 1;
-      this.dataToSend.fightMove = this.dataToSend.fightMove || {};
-      this.dataToSend.fightMove[playerID] = this.dataToSend.fightMove[playerID] || {};
-      this.dataToSend.fightMove[playerID].currentFightTick = this.fight[playerID].currentFightTick;
+      this.fight[playerID].dataToSend = this.fight[playerID].dataToSend || {};
+      this.fight[playerID].dataToSend.fightMove = this.fight[playerID].dataToSend.fightMove || {};
+      this.fight[playerID].dataToSend.fightMove.currentFightTick = this.fight[playerID].currentFightTick;
     }
     changeMove(playerID){
 
-      this.dataToSend.fightMove = this.dataToSend.fightMove || {};
-      this.dataToSend.fightMove[playerID] = this.dataToSend.fightMove[playerID] || {};
+      this.fight[playerID].dataToSend = this.fight[playerID].dataToSend || {};
+      this.fight[playerID].dataToSend.fightMove = this.fight[playerID].dataToSend.fightMove || {};
 
       if(this.fight[playerID].turn == "none"){
         this.fight[playerID].turn = "opponent";
-        this.dataToSend.fightMove[playerID].turn = "opponent";
+        this.fight[playerID].dataToSend.fightMove.turn = this.fight[playerID].turn;
       }else if(this.fight[playerID].turn == "player"){
         this.fight[playerID].turn = "none";
-        this.dataToSend.fightMove[playerID].turn = "player";// TODO
+        this.fight[playerID].dataToSend.fightMove.turn = "player";
       }else{
         this.fight[playerID].turn = "player";
-        this.dataToSend.fightMove[playerID].turn = "player";
+        this.fight[playerID].dataToSend.fightMove.turn = this.fight[playerID].turn;
       }
 
       this.fight[playerID].damaged = false;
       this.fight[playerID].currentFightTick = this.fight[playerID].maxFightTick;
-      this.dataToSend.fightMove[playerID].currentFightTick = this.fight[playerID].maxFightTick;
+      this.fight[playerID].dataToSend.fightMove.currentFightTick = this.fight[playerID].maxFightTick;
 
     }
 
@@ -345,9 +361,13 @@ class Map{
 
 
       this.changeMove(playerID);
-      this.dataToSend.fightMove[playerID].player = this.dataToSend.fightMove[playerID].player || {};
-      this.dataToSend.fightMove[playerID].player.playerSkillData = this.fight[playerID].skill;
+      this.fight[playerID].dataToSend.fightMove.player = this.fight[playerID].dataToSend.player || {};
+      this.fight[playerID].dataToSend.fightMove.player.playerSkillData = this.fight[playerID].skill;
 
+    }
+
+    handleFightEnd(playerID,enemyID){
+      this.fight[playerID].dataToSend.fightResult = true;
     }
 
 }
@@ -362,11 +382,11 @@ class FirstMap extends Map{
                   //  Static.getHouse2Data(300,330)
       ];
 
-      for(var i=0;i<50;i++){
+      for(var i=0;i<250;i++){
         if(Math.random() > 0.5){
-          statics.push(Static.getTreeData(Math.floor(Math.random() * 1150 + 50),Math.floor(Math.random() * 650 + 650)));
+          statics.push(Static.getTreeData(Math.floor(Math.random() * 1150 + 50),Math.floor(Math.random() * 1300)));
         }else{
-          statics.push(Static.getTree2Data(Math.floor(Math.random() * 1150 + 50),Math.floor(Math.random() * 650 + 650)));
+          statics.push(Static.getTree2Data(Math.floor(Math.random() * 1150 + 50),Math.floor(Math.random() * 1300)));
         }
       }
     super("firstMap", MapTiles["firstMap"],{},{},statics,socketTable);

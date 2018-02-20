@@ -36,6 +36,7 @@ const Game = {
     shortestPath : undefined,
     socketHandler : undefined,
     canvasesHandler : undefined,
+    fightHandler : undefined,
     dataToSend : {},
     fightData : {},
 
@@ -61,6 +62,10 @@ const Game = {
 
 
     this.handler.drawer = new Drawer(this.handler);
+    this.handler.shortestPath = new ShortestPath(this.handler,this.handler.drawer,this.handler.gameCanvasesWidth,this.handler.gameCanvasesHeight);
+
+    this.handler.fightHandler = new FightHandler(this.handler);
+    this.handler.fightHandler.set();
 
     socket.emit("initialized", {id : Game.handler.character.id});
     setTimeout(Game.mainLoop,1000);
@@ -77,6 +82,7 @@ const Game = {
       Game.handler.camera.tick();
       Game.handler.currentMap.tick();
       Game.handler.character.tick();
+      Game.handler.drawer.drawItems();
       Game.handler.globalTickCounter += 1;
       Game.handler.socketHandler.emitData();
       Game.handler.dataToSend = {};
@@ -109,11 +115,15 @@ const Game = {
       Game.handler.canvasesHandler.setWidthAndHeightOfCanvases();
       Game.handler.camera.handleMoveXandMoveY();
       Game.handler.currentMap.onResize();
+      Game.handler.shortestPath.onResize(Game.handler.gameCanvasesWidth,Game.handler.gameCanvasesHeight);
     }
 
   }
 
+
 }
+
+
 
 
 window.addEventListener("resize", Game.onResize);
