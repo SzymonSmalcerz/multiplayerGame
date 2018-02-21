@@ -57,12 +57,16 @@
 
     if(this.handler.windowSize == "small"){
       this.handler.parentDiv.width  = window.innerWidth;
+      this.handler.parentDiv.style.width  = window.innerWidth + "px";
       this.handler.parentDiv.height  = window.innerHeight;
+      this.handler.parentDiv.style.height  = window.innerHeight + "px";
       this.handler.parentDiv.style.top = "0";
       this.handler.parentDiv.style.left = "0";
     }else{
       this.handler.parentDiv.width  = window.innerWidth/2;
+      this.handler.parentDiv.style.width  = window.innerWidth/2 + "px";
       this.handler.parentDiv.height  = window.innerHeight/10 * 8;
+      this.handler.parentDiv.style.height  = window.innerHeight/10 * 8 + "px";
       this.handler.parentDiv.style.top = "10%";
       this.handler.parentDiv.style.left = "25%";
     }

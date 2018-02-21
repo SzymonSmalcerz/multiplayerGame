@@ -194,6 +194,7 @@ class FightHandler{
     this.handler.character.opponent = {};
     this.handler.character.hasJustMadeMoveInFight = false;
     this.handler.fightData = {};
+    this.setFightIcons();
     Game.onResize();
   }
 
@@ -205,11 +206,15 @@ class FightHandler{
       }
 
       if(this.handler.windowSize == "small"){//window.innerWidt < 600 px
+
         this.normalAttackIcon.style.left = "74px";
         this.normalAttackIcon.style.top = this.handler.gameCanvasesHeight - 74 + "px";
         this.kamehamehaIcon.style.left = "148px";
         this.kamehamehaIcon.style.top = this.handler.gameCanvasesHeight - 74 + "px";
+
+
       }else{
+
         var leftCorner = this.handler.gameCanvasesWidth/5;
         var bottomCorner =  ((9 * this.handler.gameCanvasesHeight/10) - 64);
         this.normalAttackIcon.style.left = leftCorner + "px";
@@ -217,8 +222,13 @@ class FightHandler{
 
         this.normalAttackIcon.style.top = bottomCorner + "px";
         this.kamehamehaIcon.style.top = bottomCorner + "px";
+
       }
 
+      this.mainCharacterIcon.style.left = "10px";
+      this.mainCharacterIcon.style.top = "10px";
+      this.opponentIcon.style.right = "10px";
+      this.opponentIcon.style.top = "10px";
 
         this.normalAttackIcon.style.visibility = "visible";
         this.kamehamehaIcon.style.visibility = "visible";

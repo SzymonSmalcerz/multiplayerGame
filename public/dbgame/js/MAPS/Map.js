@@ -145,12 +145,12 @@ class Map{
             var ratio = 3*(fightData.maxFightTick-fightData.currentFightTick)/(fightData.maxFightTick);
             var x = defaultCharacterPosition - player.width/2  + ((defaultOpponentPosition - defaultCharacterPosition) *(ratio));
 
-            for(var i=player.renderX + player.width;i<=x;i+=5){
+            for(var i=player.renderX + player.width;i<=x;i+=3){
               fightData.skill.draw(i,player.renderY);
             }
           }else if(fightData.currentFightTick > fightData.maxFightTick/3){
             var x = defaultOpponentPosition - enemy.width/2;
-            for(var i=player.renderX + player.width;i<=x;i+=5){
+            for(var i=player.renderX + player.width;i<=x;i+=3){
               fightData.skill.draw(i,player.renderY);
             }
 
@@ -159,7 +159,7 @@ class Map{
             var ratio = ((fightData.maxFightTick-fightData.currentFightTick) - 2/3 * (fightData.maxFightTick))/(fightData.maxFightTick/3);
             var xR = defaultOpponentPosition - enemy.width/2;
             var xL = defaultCharacterPosition + player.width  + ((defaultOpponentPosition - defaultCharacterPosition) *(ratio));
-            for(var i=xL;i<=xR;i+=5){
+            for(var i=xL;i<=xR;i+=3){
               fightData.skill.draw(i,player.renderY);
             }
             this.drawExplosion = true;

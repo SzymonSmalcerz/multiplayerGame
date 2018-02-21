@@ -54,7 +54,6 @@ const Game = {
   init : function(){
 
 
-    this.setWindowSize();
     this.handler.socketHandler = new SocketHandler(this.handler);
     this.handler.socketHandler.setSockets();
     this.handler.camera = new Camera(this.handler);
@@ -105,6 +104,8 @@ const Game = {
     this.handler.character = new MainCharacter(this.handler, playerData);
   },
   setCurrentMap : function(mapData){
+    //Game.handler.windowSize must be set before canvas is created
+    this.setWindowSize();
     //creating cavas is needed for map to exist so we must create canvasses before creating map
     this.handler.canvasesHandler = new CanvasesHandler(this.handler);
     this.handler.canvasesHandler.setCanvases();
@@ -113,14 +114,17 @@ const Game = {
   },
   onResize(){
 
-    if(Game.handler.canvasesHandler){
-      Game.handler.canvasesHandler.setWidthAndHeightOfCanvases();
-      Game.handler.camera.handleMoveXandMoveY();
-      Game.handler.currentMap.onResize();
-      Game.handler.fightHandler.onResize();
-      Game.handler.shortestPath.onResize(Game.handler.gameCanvasesWidth,Game.handler.gameCanvasesHeight);
-    }
-    Game.setWindowSize();
+    setTimeout(function(){
+      if(Game.handler.canvasesHandler){
+        Game.setWindowSize();
+        Game.handler.canvasesHandler.setWidthAndHeightOfCanvases();
+        Game.handler.camera.handleMoveXandMoveY();
+        Game.handler.currentMap.onResize();
+        Game.handler.fightHandler.onResize();
+        Game.handler.shortestPath.onResize(Game.handler.gameCanvasesWidth,Game.handler.gameCanvasesHeight);
+      }
+    },0)
+
 
   },
   setWindowSize(){
