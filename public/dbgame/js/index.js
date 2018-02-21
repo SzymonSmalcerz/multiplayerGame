@@ -83,6 +83,7 @@ const Game = {
       Game.handler.currentMap.tick();
       Game.handler.character.tick();
       Game.handler.drawer.drawItems();
+      Game.handler.fightHandler.tick();
       Game.handler.globalTickCounter += 1;
       Game.handler.socketHandler.emitData();
       Game.handler.dataToSend = {};

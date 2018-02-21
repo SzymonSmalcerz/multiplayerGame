@@ -1,10 +1,13 @@
 class FightHandler{
   constructor(handler){
     this.handler = handler;
+    this.normalAttackIcon = undefined;
+    this.kamehamehaIcon = undefined;
   }
 
   set(){
     var handler = this.handler;
+    this.createFightSkillsButtons();
     this.handler.canvas.addEventListener('click', function(event) {
 
 
@@ -75,5 +78,55 @@ class FightHandler{
       }
 
     })
+  }
+
+  createFightSkillsButtons(){
+    this.normalAttackIcon = document.createElement("img");
+    this.normalAttackIcon.setAttribute("class", "attackIcons");
+    this.normalAttackIcon.setAttribute("src", "dbgame/js/SPRITES/fightSkills.png");
+    this.normalAttackIcon.style.objectPosition = "0 0";
+    this.normalAttackIcon.style.position = "absolute";
+    this.normalAttackIcon.style.visibility = "hidden";
+
+    this.kamehamehaIcon = document.createElement("img");
+    this.kamehamehaIcon.setAttribute("class", "attackIcons");
+    this.kamehamehaIcon.setAttribute("src", "dbgame/js/SPRITES/fightSkills.png");
+    this.kamehamehaIcon.style.objectPosition = "-64px 0";
+    this.kamehamehaIcon.style.position = "absolute";
+    this.kamehamehaIcon.style.visibility = "hidden";
+
+    var handler = this.handler;
+    this.normalAttackIcon.addEventListener('click',function(event){
+      handler.dataToSend.fightMove = {
+        move : "normal"
+      }
+      handler.character.hasJustMadeMoveInFight = true;
+      event.stopPropagation();
+    });
+
+    this.kamehamehaIcon.addEventListener('click',function(event){
+      handler.dataToSend.fightMove = {
+        move : "kamehame"
+      }
+      handler.character.hasJustMadeMoveInFight = true;
+      event.stopPropagation();
+    });
+
+    this.handler.parentDiv.appendChild(this.normalAttackIcon);
+    this.handler.parentDiv.appendChild(this.kamehamehaIcon);
+  }
+
+  tick(){
+    if(this.handler.character.isFighting){
+      this.normalAttackIcon.style.visibility = "visible";
+      this.normalAttackIcon.style.left = this.handler.gameCanvasesWidth/10 + "px";
+      this.normalAttackIcon.style.top = this.handler.gameCanvasesHeight - 74 + "px";
+      this.kamehamehaIcon.style.visibility = "visible";
+      this.kamehamehaIcon.style.left = this.handler.gameCanvasesWidth/10 + 74 + "px";
+      this.kamehamehaIcon.style.top = this.handler.gameCanvasesHeight - 74 + "px";
+    }else{
+      this.normalAttackIcon.style.visibility = "hidden";
+      this.kamehamehaIcon.style.visibility = "hidden";
+    }
   }
 }
