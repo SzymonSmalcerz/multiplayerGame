@@ -89,10 +89,10 @@ class Map{
       enemy.renderY = this.bottomBorderOfDisplayWindow * 0.5 - enemy.height*0.8;
       player.renderY = this.bottomBorderOfDisplayWindow * 0.5 - player.height*0.8;
 
-      if(this.rightBorderOfDisplayWindow>450){
+      if(this.handler.windowSize == "big"){
         var defaultOpponentPosition = this.rightBorderOfDisplayWindow * 0.60;
         var defaultCharacterPosition = this.rightBorderOfDisplayWindow * 0.40;
-      }else if(this.rightBorderOfDisplayWindow > 300){
+      }else if(this.handler.windowSize == "medium"){
         var defaultOpponentPosition = this.rightBorderOfDisplayWindow * 0.70;
         var defaultCharacterPosition = this.rightBorderOfDisplayWindow * 0.30;
       }else{

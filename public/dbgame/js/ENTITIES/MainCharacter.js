@@ -68,18 +68,14 @@ class MainCharacter extends Mob{
 
   manageFighting(){
     if(keyHandler["49"]){
-      keyHandler["49"] = false;
-      this.handler.dataToSend.fightMove = {
-        move : "normal"
-      }
-      this.hasJustMadeMoveInFight = true;
+      this.handler.fightHandler.fillFightMoveDataToSend("normal");
     }else if(keyHandler["50"]){
-      keyHandler["50"] = false;
-      this.handler.dataToSend.fightMove = {
-        move : "kamehame"
-      }
-      this.hasJustMadeMoveInFight = true;
+      this.handler.fightHandler.fillFightMoveDataToSend("kamehame")
     }
+
+    for(var i = 49;i<58;i++){
+			keyHandler[i.toString()] = false;
+		};
   }
 
   move(x,y){
@@ -232,9 +228,6 @@ window.addEventListener("keyup",function(event){
 
 
 	if(event.keyCode >=  49 && event.keyCode <= 57){
-		for(var i = 49;i<58;i++){
-			keyHandler[i.toString()] = false;
-		};
     keyHandler[event.keyCode] = true;
 	}
 

@@ -3,6 +3,8 @@ class FightHandler{
     this.handler = handler;
     this.normalAttackIcon = undefined;
     this.kamehamehaIcon = undefined;
+    this.mainCharacterIcon = undefined;
+    this.opponentIcon = undefined;
   }
 
   set(){
@@ -50,7 +52,9 @@ class FightHandler{
               handler.parentDiv.appendChild(button);
               handler.parentDiv.appendChild(buttonFastAttack);
 
+
               button.addEventListener('click',function(event){
+
                 handler.dataToSend.fight = {
                   enemyID : enemyID,
                   typeOfFight: "normal"
@@ -65,7 +69,6 @@ class FightHandler{
                   enemyID : enemyID,
                   typeOfFight: "fast"
                 };
-                event.stopPropagation();
                 handler.parentDiv.removeChild(button);
                 handler.parentDiv.removeChild(this);
               });
@@ -80,7 +83,36 @@ class FightHandler{
     })
   }
 
+  fillFightMoveDataToSend(move,event){
+    this.handler.dataToSend.fightMove = {
+      move
+    }
+    this.handler.character.hasJustMadeMoveInFight = true;
+    if(event){
+      event.stopPropagation();
+    }
+  }
+
   createFightSkillsButtons(){
+
+    this.mainCharacterIcon = document.createElement("img");
+    this.mainCharacterIcon.setAttribute("class", "attackIcons");
+    this.mainCharacterIcon.setAttribute("src", this.handler.character.sprite.src);
+    this.mainCharacterIcon.style.objectPosition = "0 0";
+    this.mainCharacterIcon.style.width = "32px";
+    this.mainCharacterIcon.style.height = "32px";
+    this.mainCharacterIcon.style.position = "absolute";
+    this.mainCharacterIcon.style.visibility = "hidden";
+
+
+    this.opponentIcon = document.createElement("img");
+    this.opponentIcon.setAttribute("class", "attackIcons");
+    this.opponentIcon.style.objectPosition = "0 0";
+    this.opponentIcon.style.width = "32px";
+    this.opponentIcon.style.height = "32px";
+    this.opponentIcon.style.position = "absolute";
+    this.opponentIcon.style.visibility = "hidden";
+
     this.normalAttackIcon = document.createElement("img");
     this.normalAttackIcon.setAttribute("class", "attackIcons");
     this.normalAttackIcon.setAttribute("src", "dbgame/js/SPRITES/fightSkills.png");
@@ -95,38 +127,112 @@ class FightHandler{
     this.kamehamehaIcon.style.position = "absolute";
     this.kamehamehaIcon.style.visibility = "hidden";
 
-    var handler = this.handler;
-    this.normalAttackIcon.addEventListener('click',function(event){
-      handler.dataToSend.fightMove = {
-        move : "normal"
-      }
-      handler.character.hasJustMadeMoveInFight = true;
-      event.stopPropagation();
-    });
-
-    this.kamehamehaIcon.addEventListener('click',function(event){
-      handler.dataToSend.fightMove = {
-        move : "kamehame"
-      }
-      handler.character.hasJustMadeMoveInFight = true;
-      event.stopPropagation();
-    });
+    var that = this;
+    this.normalAttackIcon.addEventListener('click',function(event){that.fillFightMoveDataToSend("normal",event)});
+    this.kamehamehaIcon.addEventListener('click',function(event){that.fillFightMoveDataToSend("kamehame",event)});
 
     this.handler.parentDiv.appendChild(this.normalAttackIcon);
     this.handler.parentDiv.appendChild(this.kamehamehaIcon);
+    this.handler.parentDiv.appendChild(this.mainCharacterIcon);
+    this.handler.parentDiv.appendChild(this.opponentIcon);
   }
 
-  tick(){
+  initializeFight(data){
+    var handler = this.handler;
+    handler.drawer.removeAllItems();
+    handler.character.isFighting = true;
+    handler.character.idle = handler.character.idleDown;
+    handler.character.currentSprite = handler.character.idle;
+    handler.character.opponent = handler.enemies[data.enemyID];
+    handler.fightData = {};
+    handler.fightData.currentFightTick = data.currentFightTick;
+    handler.fightData.maxFightTick = data.maxFightTick;
+    handler.fightData.idle = data.idle;
+    handler.fightData.moveLeft = data.moveLeft;
+    handler.fightData.fightSprite = data.fightSprite;
+    handler.fightData.moveRight = data.moveRight;
+    handler.fightData.turn = data.turn;
+
+    this.setFightIcons();
+  }
+
+  handleFightMove(fightData){
+    var handler = this.handler;
+    if(fightData.turn){
+      handler.fightData.turn = fightData.turn;
+    }
+
+    handler.fightData.currentFightTick = fightData.currentFightTick;
+
+    if(fightData.player){
+      if(fightData.player.health){
+        handler.character.health = fightData.player.health;
+      }
+      if(fightData.player.playerSkillData){
+        handler.fightData.playerSkillData = fightData.player.playerSkillData;
+        handler.fightData.skill = new Skill(fightData.player.playerSkillData.frameTable,handler);
+        handler.fightData.explosion = new Skill(fightData.player.playerSkillData.detonationTable,handler);
+        console.log("changed explosion :c");
+        handler.character.isUsingSkill = true;
+      }
+    }
+
+    if(fightData.opponent){
+      handler.character.opponent.health = fightData.opponent.health;
+    }
+  }
+
+  handleWin(){
+    this.handler.character.isUsingSkill = false;
+    this.handler.drawer.drawWinDialog();
+    this.handler.fightData.maxFightTick = 0;
+  }
+
+  handleEndOfFigh(){
+    this.handler.character.isFighting = false;
+    this.handler.character.isUsingSkill = false;
+    this.handler.character.opponent = {};
+    this.handler.character.hasJustMadeMoveInFight = false;
+    this.handler.fightData = {};
+    Game.onResize();
+  }
+
+  setFightIcons(){
     if(this.handler.character.isFighting){
-      this.normalAttackIcon.style.visibility = "visible";
-      this.normalAttackIcon.style.left = this.handler.gameCanvasesWidth/10 + "px";
-      this.normalAttackIcon.style.top = this.handler.gameCanvasesHeight - 74 + "px";
-      this.kamehamehaIcon.style.visibility = "visible";
-      this.kamehamehaIcon.style.left = this.handler.gameCanvasesWidth/10 + 74 + "px";
-      this.kamehamehaIcon.style.top = this.handler.gameCanvasesHeight - 74 + "px";
+
+      if(this.handler.character.opponent){
+        this.opponentIcon.setAttribute("src", this.handler.character.opponent.sprite.src);
+      }
+
+      if(this.handler.windowSize == "small"){//window.innerWidt < 600 px
+        this.normalAttackIcon.style.left = "74px";
+        this.normalAttackIcon.style.top = this.handler.gameCanvasesHeight - 74 + "px";
+        this.kamehamehaIcon.style.left = "148px";
+        this.kamehamehaIcon.style.top = this.handler.gameCanvasesHeight - 74 + "px";
+      }else{
+        var leftCorner = this.handler.gameCanvasesWidth/5;
+        var bottomCorner =  ((9 * this.handler.gameCanvasesHeight/10) - 64);
+        this.normalAttackIcon.style.left = leftCorner + "px";
+        this.kamehamehaIcon.style.left = leftCorner + 100 + "px";
+
+        this.normalAttackIcon.style.top = bottomCorner + "px";
+        this.kamehamehaIcon.style.top = bottomCorner + "px";
+      }
+
+
+        this.normalAttackIcon.style.visibility = "visible";
+        this.kamehamehaIcon.style.visibility = "visible";
+        this.mainCharacterIcon.style.visibility = "visible";
+        this.opponentIcon.style.visibility = "visible";
     }else{
       this.normalAttackIcon.style.visibility = "hidden";
       this.kamehamehaIcon.style.visibility = "hidden";
+      this.mainCharacterIcon.style.visibility = "hidden";
+      this.opponentIcon.style.visibility = "hidden";
     }
+  }
+
+  onResize(){
+    this.setFightIcons();
   }
 }

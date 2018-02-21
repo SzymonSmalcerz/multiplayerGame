@@ -55,8 +55,7 @@
 
 
 
-
-    if(window.innerWidth < 400){
+    if(this.handler.windowSize == "small"){
       this.handler.parentDiv.width  = window.innerWidth;
       this.handler.parentDiv.height  = window.innerHeight;
       this.handler.parentDiv.style.top = "0";

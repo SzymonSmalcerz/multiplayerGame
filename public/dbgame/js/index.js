@@ -32,6 +32,7 @@ const Game = {
     character : undefined,
     gameCanvasesWidth : undefined,
     gameCanvasesHeight : undefined,
+    windowSize : undefined,//big,medium,small for diffrent screen sizes
     drawer : undefined,
     shortestPath : undefined,
     socketHandler : undefined,
@@ -53,6 +54,7 @@ const Game = {
   init : function(){
 
 
+    this.setWindowSize();
     this.handler.socketHandler = new SocketHandler(this.handler);
     this.handler.socketHandler.setSockets();
     this.handler.camera = new Camera(this.handler);
@@ -83,7 +85,6 @@ const Game = {
       Game.handler.currentMap.tick();
       Game.handler.character.tick();
       Game.handler.drawer.drawItems();
-      Game.handler.fightHandler.tick();
       Game.handler.globalTickCounter += 1;
       Game.handler.socketHandler.emitData();
       Game.handler.dataToSend = {};
@@ -116,9 +117,20 @@ const Game = {
       Game.handler.canvasesHandler.setWidthAndHeightOfCanvases();
       Game.handler.camera.handleMoveXandMoveY();
       Game.handler.currentMap.onResize();
+      Game.handler.fightHandler.onResize();
       Game.handler.shortestPath.onResize(Game.handler.gameCanvasesWidth,Game.handler.gameCanvasesHeight);
     }
+    Game.setWindowSize();
 
+  },
+  setWindowSize(){
+    if(window.innerWidth>1200){
+      this.handler.windowSize = "big";
+    }else if(window.innerWidth > 700){
+      this.handler.windowSize = "medium";
+    }else{
+      this.handler.windowSize = "small";
+    }
   }
 
 
