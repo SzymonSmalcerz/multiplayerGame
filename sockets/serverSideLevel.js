@@ -393,14 +393,14 @@ class Map{
 class FirstMap extends Map{
   constructor(socketTable){
     var statics = [
-                  //  Static.getHouse1Data(500,400),
-                  //  Static.getHouse1Data(650,400),
-                  //  Static.getHouse1Data(800,400),
-                  //  Static.getHouse1Data(950,400),
-                  //  Static.getHouse2Data(300,330)
+                   Static.getHouse1Data(500,400),
+                   Static.getHouse1Data(650,400),
+                   Static.getHouse1Data(800,400),
+                   Static.getHouse1Data(950,400),
+                   Static.getHouse2Data(300,330)
       ];
 
-      for(var i=0;i<250;i++){
+      for(var i=0;i<50;i++){
         if(Math.random() > 0.5){
           statics.push(Static.getTreeData(Math.floor(Math.random() * 1150 + 50),Math.floor(Math.random() * 1300)));
         }else{
@@ -413,10 +413,10 @@ class FirstMap extends Map{
 
   checkForEnemies(){
     this.respawnFrame += 1;
-    if(this.numberOfHulks < 2 && this.respawnFrame > 1){
+    if(this.numberOfHulks < 100 && this.respawnFrame > 0){
       this.respawnFrame = 0;
-      var x = Math.floor(Math.random() * 150 + 20);
-      var y = Math.floor(Math.random() * 100 + 400);
+      var x = Math.floor(Math.random() * 400 + 50);
+      var y = Math.floor(Math.random() * 400);
       var tempID = "hu" + Math.floor(Math.random() * 1000000) + "fm";
       var here = this;
       this.enemies[tempID] = new Hit(tempID,x,y,function(){

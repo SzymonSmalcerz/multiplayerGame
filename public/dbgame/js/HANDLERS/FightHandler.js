@@ -1,17 +1,41 @@
 class FightHandler{
   constructor(handler){
+
     this.handler = handler;
+
     this.normalAttackIcon = undefined;
     this.kamehamehaIcon = undefined;
     this.mainCharacterIcon = undefined;
     this.opponentIcon = undefined;
+
+    this.buttonNormAttack = undefined;
+    this.buttonFastAttack = undefined;
+
+
+    this.potentialOpponentOfPlayer = undefined;
+
   }
 
   set(){
-    var handler = this.handler;
     this.createFightSkillsButtons();
-    this.handler.canvas.addEventListener('click', function(event) {
+    this.createFightInitializationButtons();
+    this.addEventListeners();
+  }
 
+  fillFightMoveDataToSend(move,event){
+    this.handler.dataToSend.fightMove = {
+      move
+    }
+    this.handler.character.hasJustMadeMoveInFight = true;
+    if(event){
+      event.stopPropagation();
+    }
+  }
+
+  addEventListeners(){
+    var handler = this.handler;
+    var that = this;
+    this.handler.canvas.addEventListener('click', function(event) {
 
       var playerCenter = Helper.getCenterOfEntity(handler.character);
 
@@ -26,53 +50,23 @@ class FightHandler{
           };
 
         if(Helper.getDistanceBetweenTwo2DPoints(clickPoint,enemyCenter) < handler.enemies[enemyID].collisionWidth){
+
+            that.potentialOpponentOfPlayer = handler.enemies[enemyID];
+            console.log("SETTING POTENTIAL OPPONENT OF PLAYER");
             var distance = Helper.getDistanceBetweenTwo2DPoints(playerCenter,enemyCenter);
 
 
             if(distance < handler.character.width + handler.enemies[enemyID].width/2){
 
+              that.buttonNormAttack.style.visibility = "visible";
+              that.buttonFastAttack.style.visibility = "visible";
 
-              var button = document.createElement("button");
-              button.setAttribute("id", "buttonNormAttack");
-              button.textContent = "normAttack";
-              button.style.position = "absolute";
-              button.style.left = handler.enemies[enemyID].renderX + handler.enemies[enemyID].width + "px";
-              button.style.top = handler.enemies[enemyID].renderY + handler.enemies[enemyID].height + "px";
+              that.buttonNormAttack.style.left = handler.enemies[enemyID].renderX + handler.enemies[enemyID].width + "px";
+              that.buttonNormAttack.style.top = handler.enemies[enemyID].renderY - 55 + "px";
 
-
-
-              var buttonFastAttack = document.createElement("button");
-              buttonFastAttack.setAttribute("id", "buttonFastAttack");
-              buttonFastAttack.textContent = "fastAttack";
-              buttonFastAttack.style.position = "absolute";
-              buttonFastAttack.style.left = handler.enemies[enemyID].renderX + handler.enemies[enemyID].width + "px";
-              buttonFastAttack.style.top = handler.enemies[enemyID].renderY + "px";
-
-
-              handler.parentDiv.appendChild(button);
-              handler.parentDiv.appendChild(buttonFastAttack);
-
-
-              button.addEventListener('click',function(event){
-
-                handler.dataToSend.fight = {
-                  enemyID : enemyID,
-                  typeOfFight: "normal"
-                };
-                event.stopPropagation();
-                handler.parentDiv.removeChild(buttonFastAttack);
-                handler.parentDiv.removeChild(this);
-              });
-
-              buttonFastAttack.addEventListener('click',function(event){
-                handler.dataToSend.fight = {
-                  enemyID : enemyID,
-                  typeOfFight: "fast"
-                };
-                handler.parentDiv.removeChild(button);
-                handler.parentDiv.removeChild(this);
-              });
-
+              that.buttonFastAttack.style.left = handler.enemies[enemyID].renderX + handler.enemies[enemyID].width + "px";
+              that.buttonFastAttack.style.top = handler.enemies[enemyID].renderY + "px";
+              that.opponentID = enemyID;
               break;
 
             }
@@ -80,17 +74,58 @@ class FightHandler{
 
       }
 
-    })
+    });
   }
 
-  fillFightMoveDataToSend(move,event){
-    this.handler.dataToSend.fightMove = {
-      move
-    }
-    this.handler.character.hasJustMadeMoveInFight = true;
-    if(event){
+  createFightInitializationButtons(){
+
+    var handler = this.handler;
+    var that = this;
+
+    this.buttonNormAttack = document.createElement("img");
+    this.buttonNormAttack.setAttribute("class", "attackInitializationIcons");
+    this.buttonNormAttack.setAttribute("src", "dbgame/js/SPRITES/fightButtons.png");
+    this.buttonNormAttack.style.objectPosition = "0 0";
+    this.buttonNormAttack.style.position = "absolute";
+    this.buttonNormAttack.style.visibility = "hidden";
+
+    this.buttonNormAttack.addEventListener('click',function(event){
+
+      handler.dataToSend.fight = {
+        enemyID : that.opponentID,
+        typeOfFight: "normal"
+      };
       event.stopPropagation();
-    }
+
+
+      that.buttonFastAttack.style.visibility = "hidden";
+      this.style.visibility = "hidden";
+    });
+
+
+
+    this.buttonFastAttack = document.createElement("img");
+    this.buttonFastAttack.setAttribute("class", "attackInitializationIcons");
+    this.buttonFastAttack.setAttribute("src", "dbgame/js/SPRITES/fightButtons.png");
+    this.buttonFastAttack.style.objectPosition = "-100px 0";
+    this.buttonFastAttack.style.position = "absolute";
+    this.buttonFastAttack.style.visibility = "hidden";
+
+
+    this.buttonFastAttack.addEventListener('click',function(event){
+      handler.dataToSend.fight = {
+        enemyID : that.opponentID,
+        typeOfFight: "fast"
+      };
+      event.stopPropagation();
+
+      that.buttonNormAttack.style.visibility = "hidden";
+      this.style.visibility = "hidden";
+    });
+
+
+    handler.parentDiv.appendChild(this.buttonNormAttack);
+    handler.parentDiv.appendChild(this.buttonFastAttack);
   }
 
   createFightSkillsButtons(){

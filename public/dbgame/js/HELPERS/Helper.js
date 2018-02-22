@@ -20,8 +20,6 @@ Helper.areTwoEntitiesInRange = function(entity1, entity2, speedOfEntity1){
   //entity is moving so we must consider its speed
   centerOfEntity1.renderX += speedOfEntity1.x;
   centerOfEntity1.renderY += speedOfEntity1.y;
-
-
   if(
        Math.abs(centerOfEntity1.renderX - centerOfEntity2.renderX) <= (entity1.collisionWidth/2 + entity2.collisionWidth/2)
     && Math.abs(centerOfEntity1.renderY - centerOfEntity2.renderY) <= (entity1.collisionHeight/2 + entity2.collisionHeight/2)

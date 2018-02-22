@@ -170,12 +170,28 @@ class ShortestPath{
               canMove = true;
               mockEntity.renderX = w - mainEntity.width/2;
               mockEntity.renderY = h - mainEntity.height*0.9 + mainEntity.collisionHeight/2;
+              var handler = this.handler;
               allEntities.forEach(function(entity){
                 if(entity === mainEntity){
                   return;
                 }
                 if(Helper.areTwoEntitiesInRange(mockEntity,entity)){
-                  canMove = false;
+
+                  if(enemyFight){
+                    console.log(handler.fightHandler);
+                    if(handler.fightHandler.potentialOpponentOfPlayer){
+                      console.log("ISTENIJE");
+                      if(entity === handler.fightHandler.potentialOpponentOfPlayer){
+                        console.log("TRUEEE");
+                      }else{
+                        canMove = false;
+                      }
+                    }else{
+                      canMove = false;
+                    }
+                  }else{
+                    canMove = false;
+                  }
                 }
               });
 
