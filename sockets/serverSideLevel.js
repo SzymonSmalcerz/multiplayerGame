@@ -420,10 +420,10 @@ class FirstMap extends Map{
 
   checkForEnemies(){
     this.respawnFrame += 1;
-    if(this.numberOfHulks < 20 && this.respawnFrame > 0){
+    if(this.numberOfHulks < 15 && this.respawnFrame > 0){
       this.respawnFrame = 0;
-      var x = Math.floor(Math.random() * 800 + 50);
-      var y = Math.floor(Math.random() * 800);
+      var x = Math.floor(Math.random() * 1350 + 50);
+      var y = Math.floor(Math.random() * 1350);
       var tempID = "hu" + Math.floor(Math.random() * 1000000) + "fm";
       var here = this;
       this.enemies[tempID] = new Hit(tempID,x,y,function(){
